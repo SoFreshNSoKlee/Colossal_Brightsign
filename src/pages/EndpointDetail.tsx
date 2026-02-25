@@ -51,10 +51,14 @@ export function EndpointDetail() {
     ? state.playlists.find((p) => p.id === ep.nowPlaying.playlistId)
     : null;
 
-  // Current item in playlist
-  const currentPlaylistItem = nowPlaylist
-    ? nowPlaylist.items[ep.nowPlaying.currentItemIndex] ?? nowPlaylist.items[0]
-    : null;
+  // Current item in playlist – filter by this endpoint's items
+  const epPlaylistItems = nowPlaylist
+    ? nowPlaylist.items
+        .filter((i) => i.endpointId === ep.id)
+        .sort((a, b) => a.order - b.order)
+    : [];
+  const currentPlaylistItem =
+    epPlaylistItems[ep.nowPlaying.currentItemIndex] ?? epPlaylistItems[0] ?? null;
   const currentAssetInPlaylist = currentPlaylistItem
     ? state.assets.find((a) => a.id === currentPlaylistItem.assetId)
     : null;
@@ -65,10 +69,12 @@ export function EndpointDetail() {
       ? (nowAsset?.title ?? 'Unknown Asset')
       : (nowPlaylist?.name ?? 'Unknown Playlist');
 
+  // Only show assets assigned to this endpoint
   const filteredAssets = state.assets.filter(
     (a) =>
-      a.title.toLowerCase().includes(search.toLowerCase()) ||
-      a.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())),
+      a.endpointId === ep.id &&
+      (a.title.toLowerCase().includes(search.toLowerCase()) ||
+        a.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))),
   );
 
   const isPlaying = ep.status === 'playing';
@@ -92,7 +98,7 @@ export function EndpointDetail() {
               }}
             >
               <span className="text-white/40 text-xs font-bold">
-                {displayAsset?.aspect ?? '16:9'}
+                {ep.aspectRatio}
               </span>
             </div>
 
@@ -101,7 +107,7 @@ export function EndpointDetail() {
               <div className="font-bold text-neo-text text-base truncate">{displayTitle}</div>
               {ep.nowPlaying.mode === 'playlist' && nowPlaylist && (
                 <div className="text-xs text-neo-muted mt-0.5 truncate">
-                  Track {ep.nowPlaying.currentItemIndex + 1}/{nowPlaylist.items.length}
+                  Track {ep.nowPlaying.currentItemIndex + 1}/{epPlaylistItems.length}
                   {currentAssetInPlaylist ? ` · ${currentAssetInPlaylist.title}` : ''}
                 </div>
               )}
@@ -371,8 +377,12 @@ export function EndpointDetail() {
         title="Select Playlist"
         snapHeight="auto"
       >
+        {/* Only show playlists for this endpoint's room */}
+        <p className="text-xs text-neo-muted mb-3">
+          Showing playlists for {state.rooms.find((r) => r.id === ep.roomId)?.name ?? ep.roomId}
+        </p>
         <div className="space-y-2">
-          {state.playlists.map((pl) => {
+          {state.playlists.filter((pl) => pl.roomId === ep.roomId).map((pl) => {
             const runtime = pl.items.reduce((sum, item) => {
               const a = state.assets.find((a) => a.id === item.assetId);
               return sum + (a?.durationSec ?? 0);

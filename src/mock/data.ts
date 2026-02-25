@@ -1,10 +1,14 @@
 import type { Asset, Playlist, Preset, Room, Endpoint } from '../types';
 
 // ─── ASSETS ───────────────────────────────────────────────────────────────────
+// Every asset is assigned to a specific endpoint. The aspect ratio is derived
+// from the endpoint's fixed aspectRatio field.
 
 export const mockAssets: Asset[] = [
+  // Lobby – Left LED Wall (16:9)
   {
     id: 'mammoth-loop',
+    endpointId: 'lobby-left-led',
     title: 'Mammoth Loop',
     tags: ['Mammoth', 'Ambient'],
     durationSec: 3600,
@@ -14,6 +18,7 @@ export const mockAssets: Asset[] = [
   },
   {
     id: 'mammoth-highlight',
+    endpointId: 'lobby-left-led',
     title: 'Mammoth Highlight',
     tags: ['Mammoth', 'Investor'],
     durationSec: 180,
@@ -21,8 +26,11 @@ export const mockAssets: Asset[] = [
     updatedAt: '2024-10-05T11:30:00Z',
     color: '#A0522D',
   },
+
+  // Automation – Screen 1 (16:9)
   {
     id: 'dodo-walk',
+    endpointId: 'auto-nano-1',
     title: 'Dodo Walk',
     tags: ['Dodo', 'Ambient'],
     durationSec: 2400,
@@ -32,6 +40,7 @@ export const mockAssets: Asset[] = [
   },
   {
     id: 'dodo-feature',
+    endpointId: 'auto-nano-1',
     title: 'Dodo Feature',
     tags: ['Dodo', 'Press'],
     durationSec: 300,
@@ -39,8 +48,11 @@ export const mockAssets: Asset[] = [
     updatedAt: '2024-09-25T10:00:00Z',
     color: '#3A7CA5',
   },
+
+  // Megalodon – Wall 1 (16:9)
   {
     id: 'thylacine-day',
+    endpointId: 'mega-wall-1',
     title: 'Thylacine Day',
     tags: ['Thylacine', 'Ambient'],
     durationSec: 1800,
@@ -49,16 +61,8 @@ export const mockAssets: Asset[] = [
     color: '#6B7C4E',
   },
   {
-    id: 'thylacine-night',
-    title: 'Thylacine Night',
-    tags: ['Thylacine', 'Ambient'],
-    durationSec: 1800,
-    aspect: '16:9',
-    updatedAt: '2024-10-08T08:30:00Z',
-    color: '#2E3D2F',
-  },
-  {
     id: 'investor-overview',
+    endpointId: 'mega-wall-1',
     title: 'Investor Overview',
     tags: ['Investor', 'Press'],
     durationSec: 240,
@@ -66,17 +70,23 @@ export const mockAssets: Asset[] = [
     updatedAt: '2024-10-10T15:00:00Z',
     color: '#1A237E',
   },
+
+  // Megalodon – Wall 2 (16:9)
   {
-    id: 'kids-corner',
-    title: 'Kids Corner',
-    tags: ['Kids', 'Ambient'],
-    durationSec: 600,
-    aspect: '4:3',
-    updatedAt: '2024-09-15T12:00:00Z',
-    color: '#E91E63',
+    id: 'thylacine-night',
+    endpointId: 'mega-wall-2',
+    title: 'Thylacine Night',
+    tags: ['Thylacine', 'Ambient'],
+    durationSec: 1800,
+    aspect: '16:9',
+    updatedAt: '2024-10-08T08:30:00Z',
+    color: '#2E3D2F',
   },
+
+  // Social Den – Screen 1 (16:9)
   {
     id: 'partner-welcome',
+    endpointId: 'social-screen-1',
     title: 'Partner Welcome',
     tags: ['Ambient'],
     durationSec: 120,
@@ -84,8 +94,23 @@ export const mockAssets: Asset[] = [
     updatedAt: '2024-10-12T09:00:00Z',
     color: '#37474F',
   },
+
+  // Social Den – Screen 2 (4:3)
+  {
+    id: 'kids-corner',
+    endpointId: 'social-screen-2',
+    title: 'Kids Corner',
+    tags: ['Kids', 'Ambient'],
+    durationSec: 600,
+    aspect: '4:3',
+    updatedAt: '2024-09-15T12:00:00Z',
+    color: '#E91E63',
+  },
+
+  // Tour Path – Wall 1 (16:9)
   {
     id: 'press-reel',
+    endpointId: 'tour-wall-1',
     title: 'Press Reel',
     tags: ['Press', 'Investor'],
     durationSec: 420,
@@ -96,6 +121,8 @@ export const mockAssets: Asset[] = [
 ];
 
 // ─── PLAYLISTS (room-scoped) ───────────────────────────────────────────────────
+// Structure: Room → Playlist → Endpoint → Multiple ordered assets
+// Each PlaylistItem is scoped to an endpoint within the playlist's room.
 
 export const mockPlaylists: Playlist[] = [
   // ── Lobby ──────────────────────────────────────────────────────────────────
@@ -105,9 +132,8 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'lobby',
     loop: true,
     items: [
-      { assetId: 'mammoth-loop', order: 0 },
-      { assetId: 'thylacine-day', order: 1 },
-      { assetId: 'dodo-walk', order: 2 },
+      { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 0 },
+      { endpointId: 'lobby-left-led', assetId: 'mammoth-highlight', order: 1 },
     ],
   },
   {
@@ -116,9 +142,8 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'lobby',
     loop: false,
     items: [
-      { assetId: 'investor-overview', order: 0 },
-      { assetId: 'mammoth-highlight', order: 1 },
-      { assetId: 'press-reel', order: 2 },
+      { endpointId: 'lobby-left-led', assetId: 'mammoth-highlight', order: 0 },
+      { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 1 },
     ],
   },
   {
@@ -127,9 +152,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'lobby',
     loop: true,
     items: [
-      { assetId: 'partner-welcome', order: 0 },
-      { assetId: 'mammoth-loop', order: 1 },
-      { assetId: 'dodo-walk', order: 2 },
+      { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 0 },
     ],
   },
 
@@ -140,8 +163,8 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'automation-suite',
     loop: true,
     items: [
-      { assetId: 'mammoth-loop', order: 0 },
-      { assetId: 'thylacine-day', order: 1 },
+      { endpointId: 'auto-nano-1', assetId: 'dodo-walk', order: 0 },
+      { endpointId: 'auto-nano-1', assetId: 'dodo-feature', order: 1 },
     ],
   },
   {
@@ -150,9 +173,8 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'automation-suite',
     loop: true,
     items: [
-      { assetId: 'dodo-walk', order: 0 },
-      { assetId: 'thylacine-day', order: 1 },
-      { assetId: 'dodo-feature', order: 2 },
+      { endpointId: 'auto-nano-1', assetId: 'dodo-walk', order: 0 },
+      { endpointId: 'auto-nano-1', assetId: 'dodo-feature', order: 1 },
     ],
   },
   {
@@ -161,8 +183,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'automation-suite',
     loop: false,
     items: [
-      { assetId: 'investor-overview', order: 0 },
-      { assetId: 'press-reel', order: 1 },
+      { endpointId: 'auto-nano-1', assetId: 'dodo-feature', order: 0 },
     ],
   },
 
@@ -173,9 +194,9 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'megalodon-room',
     loop: true,
     items: [
-      { assetId: 'mammoth-loop', order: 0 },
-      { assetId: 'thylacine-day', order: 1 },
-      { assetId: 'dodo-walk', order: 2 },
+      { endpointId: 'mega-wall-1', assetId: 'thylacine-day', order: 0 },
+      { endpointId: 'mega-wall-1', assetId: 'investor-overview', order: 1 },
+      { endpointId: 'mega-wall-2', assetId: 'thylacine-night', order: 0 },
     ],
   },
   {
@@ -184,9 +205,9 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'megalodon-room',
     loop: false,
     items: [
-      { assetId: 'investor-overview', order: 0 },
-      { assetId: 'mammoth-highlight', order: 1 },
-      { assetId: 'press-reel', order: 2 },
+      { endpointId: 'mega-wall-1', assetId: 'investor-overview', order: 0 },
+      { endpointId: 'mega-wall-1', assetId: 'thylacine-day', order: 1 },
+      { endpointId: 'mega-wall-2', assetId: 'thylacine-night', order: 0 },
     ],
   },
   {
@@ -195,8 +216,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'megalodon-room',
     loop: true,
     items: [
-      { assetId: 'partner-welcome', order: 0 },
-      { assetId: 'mammoth-loop', order: 1 },
+      { endpointId: 'mega-wall-1', assetId: 'thylacine-day', order: 0 },
     ],
   },
   {
@@ -205,9 +225,9 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'megalodon-room',
     loop: true,
     items: [
-      { assetId: 'dodo-walk', order: 0 },
-      { assetId: 'dodo-feature', order: 1 },
-      { assetId: 'thylacine-night', order: 2 },
+      { endpointId: 'mega-wall-1', assetId: 'thylacine-day', order: 0 },
+      { endpointId: 'mega-wall-1', assetId: 'investor-overview', order: 1 },
+      { endpointId: 'mega-wall-2', assetId: 'thylacine-night', order: 0 },
     ],
   },
 
@@ -218,9 +238,8 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'social-den',
     loop: true,
     items: [
-      { assetId: 'partner-welcome', order: 0 },
-      { assetId: 'mammoth-loop', order: 1 },
-      { assetId: 'thylacine-day', order: 2 },
+      { endpointId: 'social-screen-1', assetId: 'partner-welcome', order: 0 },
+      { endpointId: 'social-screen-2', assetId: 'kids-corner', order: 0 },
     ],
   },
   {
@@ -229,9 +248,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'social-den',
     loop: true,
     items: [
-      { assetId: 'press-reel', order: 0 },
-      { assetId: 'dodo-feature', order: 1 },
-      { assetId: 'kids-corner', order: 2 },
+      { endpointId: 'social-screen-1', assetId: 'partner-welcome', order: 0 },
     ],
   },
   {
@@ -240,9 +257,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'social-den',
     loop: false,
     items: [
-      { assetId: 'investor-overview', order: 0 },
-      { assetId: 'mammoth-highlight', order: 1 },
-      { assetId: 'thylacine-night', order: 2 },
+      { endpointId: 'social-screen-2', assetId: 'kids-corner', order: 0 },
     ],
   },
 
@@ -253,9 +268,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'tour-path',
     loop: true,
     items: [
-      { assetId: 'mammoth-loop', order: 0 },
-      { assetId: 'thylacine-day', order: 1 },
-      { assetId: 'dodo-walk', order: 2 },
+      { endpointId: 'tour-wall-1', assetId: 'press-reel', order: 0 },
     ],
   },
   {
@@ -264,9 +277,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'tour-path',
     loop: false,
     items: [
-      { assetId: 'mammoth-highlight', order: 0 },
-      { assetId: 'dodo-feature', order: 1 },
-      { assetId: 'thylacine-day', order: 2 },
+      { endpointId: 'tour-wall-1', assetId: 'press-reel', order: 0 },
     ],
   },
   {
@@ -275,9 +286,7 @@ export const mockPlaylists: Playlist[] = [
     roomId: 'tour-path',
     loop: true,
     items: [
-      { assetId: 'thylacine-night', order: 0 },
-      { assetId: 'dodo-walk', order: 1 },
-      { assetId: 'mammoth-loop', order: 2 },
+      { endpointId: 'tour-wall-1', assetId: 'press-reel', order: 0 },
     ],
   },
 ];
@@ -313,6 +322,8 @@ export const mockRooms: Room[] = [
 ];
 
 // ─── ENDPOINTS ─────────────────────────────────────────────────────────────────
+// Each endpoint has a fixed, predefined aspectRatio. Assets and playlist items
+// are scoped to specific endpoints via this ratio.
 
 export const mockEndpoints: Endpoint[] = [
   // Lobby (2 screens)
@@ -320,6 +331,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'lobby-left-led',
     name: 'Lobby – Left LED Wall',
     roomId: 'lobby',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -332,6 +344,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'lobby-led-screen',
     name: 'Lobby – LED Screen',
     roomId: 'lobby',
+    aspectRatio: '9:16',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -346,6 +359,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'auto-nano-1',
     name: 'Automation – Screen 1',
     roomId: 'automation-suite',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -358,6 +372,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'auto-nano-2',
     name: 'Automation – Screen 2',
     roomId: 'automation-suite',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -372,6 +387,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'mega-wall-1',
     name: 'Megalodon – Wall 1',
     roomId: 'megalodon-room',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -384,6 +400,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'mega-wall-2',
     name: 'Megalodon – Wall 2',
     roomId: 'megalodon-room',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -396,6 +413,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'mega-wall-3',
     name: 'Megalodon – Wall 3',
     roomId: 'megalodon-room',
+    aspectRatio: '9:16',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -410,6 +428,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'social-screen-1',
     name: 'Social Den – Screen 1',
     roomId: 'social-den',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -422,6 +441,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'social-screen-2',
     name: 'Social Den – Screen 2',
     roomId: 'social-den',
+    aspectRatio: '4:3',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -436,6 +456,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'tour-wall-1',
     name: 'Tour Path – Wall 1',
     roomId: 'tour-path',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -448,6 +469,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'tour-wall-2',
     name: 'Tour Path – Wall 2',
     roomId: 'tour-path',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
@@ -460,6 +482,7 @@ export const mockEndpoints: Endpoint[] = [
     id: 'tour-wall-3',
     name: 'Tour Path – Wall 3',
     roomId: 'tour-path',
+    aspectRatio: '16:9',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',

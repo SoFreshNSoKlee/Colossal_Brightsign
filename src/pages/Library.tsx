@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ListMusic, Film, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Search, ListMusic, Film, Plus, Pencil, Trash2, ChevronDown } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -11,7 +11,6 @@ import type { Asset } from '../types';
 
 type LibTab = 'assets' | 'playlists';
 
-const ASPECT_OPTIONS = ['16:9', '4:3', '9:16', '1:1'];
 const COLOR_SWATCHES = [
   '#8B6914', '#A0522D', '#5B8FA8', '#3A7CA5', '#6B7C4E',
   '#2E3D2F', '#1A237E', '#E91E63', '#37474F', '#4A148C',
@@ -33,7 +32,6 @@ function formatDate(iso: string): string {
 }
 
 function parseDurationInput(val: string): number {
-  // Accepts: "3600", "60m", "1h", "1h30m", "90s"
   const raw = val.trim().toLowerCase();
   if (!raw) return 0;
   let total = 0;
@@ -58,7 +56,7 @@ type AssetFormState = {
   title: string;
   tags: string[];
   durationInput: string;
-  aspect: string;
+  endpointId: string; // Endpoint determines aspect ratio
   color: string;
 };
 
@@ -67,7 +65,7 @@ function defaultAssetForm(asset?: Asset): AssetFormState {
     title: asset?.title ?? '',
     tags: asset?.tags ?? [],
     durationInput: asset ? formatDurationForInput(asset.durationSec) : '',
-    aspect: asset?.aspect ?? '16:9',
+    endpointId: asset?.endpointId ?? '',
     color: asset?.color ?? COLOR_SWATCHES[0],
   };
 }
@@ -90,6 +88,23 @@ export function Library() {
   const [plLoop, setPlLoop] = useState(true);
   const [plRoomId, setPlRoomId] = useState('');
 
+  // Accordion state for playlist rooms (all expanded by default)
+  const [expandedRooms, setExpandedRooms] = useState<Set<string>>(
+    () => new Set(state.rooms.map((r) => r.id)),
+  );
+
+  const toggleRoomAccordion = (roomId: string) => {
+    setExpandedRooms((prev) => {
+      const next = new Set(prev);
+      if (next.has(roomId)) {
+        next.delete(roomId);
+      } else {
+        next.add(roomId);
+      }
+      return next;
+    });
+  };
+
   const toggleTag = (tag: string) => {
     setActiveTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
@@ -104,10 +119,9 @@ export function Library() {
     return matchSearch && matchTags;
   });
 
-  const filteredPlaylists = state.playlists.filter((pl) => {
-    const matchSearch =
-      !search || pl.name.toLowerCase().includes(search.toLowerCase());
-    return matchSearch;
+  // For playlists, filter by search then group by room
+  const searchFilteredPlaylists = state.playlists.filter((pl) => {
+    return !search || pl.name.toLowerCase().includes(search.toLowerCase());
   });
 
   // ── Asset modal handlers ──
@@ -140,7 +154,10 @@ export function Library() {
 
   const saveAsset = () => {
     const durationSec = parseDurationInput(assetForm.durationInput);
-    if (!assetForm.title.trim()) return;
+    if (!assetForm.title.trim() || !assetForm.endpointId) return;
+    // Derive aspect ratio from the selected endpoint
+    const selectedEndpoint = state.endpoints.find((e) => e.id === assetForm.endpointId);
+    const aspect = selectedEndpoint?.aspectRatio ?? '16:9';
     if (assetModal === 'create') {
       dispatch({
         type: 'CREATE_ASSET',
@@ -148,7 +165,8 @@ export function Library() {
           title: assetForm.title.trim(),
           tags: assetForm.tags,
           durationSec,
-          aspect: assetForm.aspect,
+          endpointId: assetForm.endpointId,
+          aspect,
           color: assetForm.color,
         },
       });
@@ -160,7 +178,8 @@ export function Library() {
           title: assetForm.title.trim(),
           tags: assetForm.tags,
           durationSec,
-          aspect: assetForm.aspect,
+          endpointId: assetForm.endpointId,
+          aspect,
           color: assetForm.color,
         },
       });
@@ -194,6 +213,9 @@ export function Library() {
       dispatch({ type: 'DELETE_PLAYLIST', playlistId });
     }
   };
+
+  // Endpoint info for asset form
+  const selectedEndpoint = state.endpoints.find((e) => e.id === assetForm.endpointId);
 
   return (
     <Layout title="Library">
@@ -273,53 +295,65 @@ export function Library() {
         {/* ── Asset grid ── */}
         {tab === 'assets' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {filteredAssets.map((asset) => (
-              <NeoCard key={asset.id} className="relative">
-                {/* Action buttons */}
-                <div className="absolute top-3 right-3 flex gap-1.5">
-                  <button
-                    onClick={() => openEditAsset(asset)}
-                    className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
-                  >
-                    <Pencil size={12} />
-                  </button>
-                  <button
-                    onClick={() => deleteAsset(asset.id)}
-                    className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 size={12} />
-                  </button>
-                </div>
-
-                {/* Thumbnail */}
-                <div
-                  className="w-full h-28 rounded-neo-sm mb-3 shadow-neo-inner flex items-center justify-center"
-                  style={{ backgroundColor: asset.color }}
-                >
-                  <span className="text-white/50 font-bold text-sm">
-                    {asset.aspect}
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="font-bold text-neo-text text-sm pr-16">{asset.title}</div>
-                <div className="text-xs text-neo-muted mt-0.5">
-                  {formatDuration(asset.durationSec)} · Updated {formatDate(asset.updatedAt)}
-                </div>
-
-                {/* Tags */}
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {asset.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10px] px-2 py-0.5 rounded-neo-pill bg-neo-accent-light text-neo-accent font-semibold"
+            {filteredAssets.map((asset) => {
+              const endpoint = state.endpoints.find((e) => e.id === asset.endpointId);
+              return (
+                <NeoCard key={asset.id} className="relative">
+                  {/* Action buttons */}
+                  <div className="absolute top-3 right-3 flex gap-1.5">
+                    <button
+                      onClick={() => openEditAsset(asset)}
+                      className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
                     >
-                      {tag}
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => deleteAsset(asset.id)}
+                      className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+
+                  {/* Thumbnail */}
+                  <div
+                    className="w-full h-28 rounded-neo-sm mb-3 shadow-neo-inner flex items-center justify-center"
+                    style={{ backgroundColor: asset.color }}
+                  >
+                    <span className="text-white/50 font-bold text-sm">
+                      {asset.aspect}
                     </span>
-                  ))}
-                </div>
-              </NeoCard>
-            ))}
+                  </div>
+
+                  {/* Info */}
+                  <div className="font-bold text-neo-text text-sm pr-16">{asset.title}</div>
+                  <div className="text-xs text-neo-muted mt-0.5">
+                    {formatDuration(asset.durationSec)} · Updated {formatDate(asset.updatedAt)}
+                  </div>
+
+                  {/* Endpoint badge */}
+                  {endpoint && (
+                    <div className="mt-1.5">
+                      <span className="text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold bg-neo-accent-light text-neo-accent">
+                        {endpoint.name}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {asset.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10px] px-2 py-0.5 rounded-neo-pill bg-neo-accent-light text-neo-accent font-semibold"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </NeoCard>
+              );
+            })}
             {filteredAssets.length === 0 && (
               <div className="col-span-2 py-12 text-center text-neo-muted">
                 No assets match your search.
@@ -328,67 +362,107 @@ export function Library() {
           </div>
         )}
 
-        {/* ── Playlist list ── */}
+        {/* ── Playlist list – grouped by room with accordion ── */}
         {tab === 'playlists' && (
           <div className="space-y-3">
-            {filteredPlaylists.map((pl) => {
-              const runtime = pl.items.reduce((sum, item) => {
-                const a = state.assets.find((a) => a.id === item.assetId);
-                return sum + (a?.durationSec ?? 0);
-              }, 0);
-              const plRoom = state.rooms.find((r) => r.id === pl.roomId);
+            {state.rooms.map((room) => {
+              const roomPlaylists = searchFilteredPlaylists.filter(
+                (pl) => pl.roomId === room.id,
+              );
+              // When searching, skip rooms with no matching playlists
+              if (search && roomPlaylists.length === 0) return null;
+              const isExpanded = expandedRooms.has(room.id);
 
               return (
-                <NeoCard key={pl.id} className="flex items-center gap-4">
-                  {/* Icon */}
-                  <div className="w-12 h-12 rounded-neo-sm bg-neo-accent-light shadow-neo-inner flex items-center justify-center flex-shrink-0">
-                    <ListMusic size={22} className="text-neo-accent" />
-                  </div>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-bold text-neo-text text-sm">{pl.name}</div>
-                    <div className="text-xs text-neo-muted mt-0.5">
-                      {pl.items.length} tracks · {formatDuration(runtime)}
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mt-1">
-                      <span
-                        className={[
-                          'text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold',
-                          pl.loop
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-amber-100 text-amber-700',
-                        ].join(' ')}
-                      >
-                        {pl.loop ? 'Loop' : 'Once'}
+                <div key={room.id} className="rounded-neo overflow-hidden">
+                  {/* Accordion header */}
+                  <button
+                    onClick={() => toggleRoomAccordion(room.id)}
+                    className="w-full flex items-center justify-between px-4 py-3 neo-surface shadow-neo text-left hover:text-neo-accent transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-neo-text">{room.name}</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-neo-pill bg-neo-accent-light text-neo-accent font-semibold">
+                        {roomPlaylists.length} playlist{roomPlaylists.length !== 1 ? 's' : ''}
                       </span>
-                      {plRoom && (
-                        <span className="text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold bg-neo-accent-light text-neo-accent">
-                          {plRoom.name}
-                        </span>
+                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={[
+                        'text-neo-muted transition-transform duration-200',
+                        isExpanded ? 'rotate-180' : '',
+                      ].join(' ')}
+                    />
+                  </button>
+
+                  {/* Accordion body */}
+                  {isExpanded && (
+                    <div className="space-y-2 pt-2 px-1 pb-1">
+                      {roomPlaylists.length === 0 ? (
+                        <div className="py-6 text-center text-xs text-neo-muted">
+                          No playlists in this room.
+                        </div>
+                      ) : (
+                        roomPlaylists.map((pl) => {
+                          const runtime = pl.items.reduce((sum, item) => {
+                            const a = state.assets.find((a) => a.id === item.assetId);
+                            return sum + (a?.durationSec ?? 0);
+                          }, 0);
+
+                          return (
+                            <NeoCard key={pl.id} className="flex items-center gap-4">
+                              {/* Icon */}
+                              <div className="w-12 h-12 rounded-neo-sm bg-neo-accent-light shadow-neo-inner flex items-center justify-center flex-shrink-0">
+                                <ListMusic size={22} className="text-neo-accent" />
+                              </div>
+
+                              {/* Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="font-bold text-neo-text text-sm">{pl.name}</div>
+                                <div className="text-xs text-neo-muted mt-0.5">
+                                  {pl.items.length} tracks · {formatDuration(runtime)}
+                                </div>
+                                <div className="flex flex-wrap gap-1.5 mt-1">
+                                  <span
+                                    className={[
+                                      'text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold',
+                                      pl.loop
+                                        ? 'bg-green-100 text-green-700'
+                                        : 'bg-amber-100 text-amber-700',
+                                    ].join(' ')}
+                                  >
+                                    {pl.loop ? 'Loop' : 'Once'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Buttons */}
+                              <div className="flex gap-1.5 flex-shrink-0">
+                                <NeoButton
+                                  size="sm"
+                                  onClick={() => navigate(`/playlists/${pl.id}/edit`)}
+                                >
+                                  Edit
+                                </NeoButton>
+                                <button
+                                  onClick={() => deletePlaylist(pl.id)}
+                                  className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </NeoCard>
+                          );
+                        })
                       )}
                     </div>
-                  </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-1.5 flex-shrink-0">
-                    <NeoButton
-                      size="sm"
-                      onClick={() => navigate(`/playlists/${pl.id}/edit`)}
-                    >
-                      Edit
-                    </NeoButton>
-                    <button
-                      onClick={() => deletePlaylist(pl.id)}
-                      className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </NeoCard>
+                  )}
+                </div>
               );
             })}
-            {filteredPlaylists.length === 0 && (
+
+            {/* No results across all rooms */}
+            {search && searchFilteredPlaylists.length === 0 && (
               <div className="py-12 text-center text-neo-muted">
                 No playlists found.
               </div>
@@ -419,6 +493,41 @@ export function Library() {
             />
           </div>
 
+          {/* Endpoint selector */}
+          <div>
+            <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
+              Endpoint
+            </label>
+            <select
+              value={assetForm.endpointId}
+              onChange={(e) => setAssetForm((f) => ({ ...f, endpointId: e.target.value }))}
+              className="w-full px-4 py-2.5 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text focus:outline-none"
+            >
+              <option value="">— Select an endpoint —</option>
+              {state.rooms.map((room) => (
+                <optgroup key={room.id} label={room.name}>
+                  {room.endpointIds.map((epId) => {
+                    const ep = state.endpoints.find((e) => e.id === epId);
+                    if (!ep) return null;
+                    return (
+                      <option key={ep.id} value={ep.id}>
+                        {ep.name} ({ep.aspectRatio})
+                      </option>
+                    );
+                  })}
+                </optgroup>
+              ))}
+            </select>
+            {/* Show derived aspect ratio */}
+            {selectedEndpoint && (
+              <p className="text-xs text-neo-muted mt-1.5">
+                Aspect ratio:{' '}
+                <span className="font-semibold text-neo-text">{selectedEndpoint.aspectRatio}</span>
+                {' '}(set automatically from endpoint)
+              </p>
+            )}
+          </div>
+
           {/* Duration */}
           <div>
             <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
@@ -431,29 +540,6 @@ export function Library() {
               placeholder="60m"
               className="w-full px-4 py-2.5 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none"
             />
-          </div>
-
-          {/* Aspect */}
-          <div>
-            <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
-              Aspect Ratio
-            </label>
-            <div className="flex gap-2 flex-wrap">
-              {ASPECT_OPTIONS.map((a) => (
-                <button
-                  key={a}
-                  onClick={() => setAssetForm((f) => ({ ...f, aspect: a }))}
-                  className={[
-                    'px-3 py-1.5 rounded-neo-pill text-xs font-semibold transition-all',
-                    assetForm.aspect === a
-                      ? 'bg-neo-accent text-white shadow-neo-sm'
-                      : 'neo-surface shadow-neo-sm text-neo-muted hover:text-neo-text',
-                  ].join(' ')}
-                >
-                  {a}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Tags */}
@@ -575,7 +661,7 @@ export function Library() {
           </div>
 
           <p className="text-xs text-neo-muted">
-            Videos can be added after creation from the playlist editor.
+            Assets can be added after creation from the playlist editor.
           </p>
 
           <div className="flex gap-3 pt-1">
