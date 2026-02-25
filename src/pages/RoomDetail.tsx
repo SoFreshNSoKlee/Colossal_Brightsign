@@ -1,15 +1,13 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronRight, Plus } from 'lucide-react';
+import { Plus, ListMusic, Play, Pencil } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
-import { NeoToggle } from '../components/design-system/NeoToggle';
 import { BottomSheetModal } from '../components/design-system/BottomSheetModal';
-import { StatusBadge, statusVariantFromEndpoint } from '../components/design-system/StatusBadge';
+import { StatusBadge } from '../components/design-system/StatusBadge';
 import { useApp } from '../context/AppContext';
-
-const TOUR_THEMES = ['Thylacine', 'Dodo', 'Mammoth'] as const;
+import { ROOM_SCREEN_COUNT } from '../mock/data';
 
 function formatDuration(sec: number): string {
   if (sec >= 3600) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
@@ -40,16 +38,17 @@ export function RoomDetail() {
   const endpoints = state.endpoints.filter((ep) =>
     room.endpointIds.includes(ep.id),
   );
+  const roomPlaylists = state.playlists.filter((pl) => pl.roomId === room.id);
+  const screenCount = ROOM_SCREEN_COUNT[room.id] ?? endpoints.length;
 
-  // Sync group support
-  const syncEps = endpoints.filter((ep) => ep.syncGroupId);
-  const syncGroupId = syncEps[0]?.syncGroupId;
-  const hasSyncGroup = syncEps.length > 1 && !!syncGroupId;
-  const syncEnabled = syncGroupId
-    ? state.uiState.syncGroups[syncGroupId] ?? false
-    : false;
+  // Derive the currently active playlist from the first endpoint
+  const activePlaylistId = endpoints[0]?.nowPlaying.playlistId;
 
-  const isTourPath = room.id === 'tour-path';
+  // Overall room status
+  const allPlaying = endpoints.every((ep) => ep.status === 'playing');
+  const allOffline = endpoints.every((ep) => ep.status === 'offline');
+  const roomStatus = allOffline ? 'offline' : allPlaying ? 'playing' : 'paused';
+  const statusVariant = allOffline ? 'error' : allPlaying ? 'success' : 'warning';
 
   const filteredAssets = state.assets.filter(
     (a) => !assetSearch || a.title.toLowerCase().includes(assetSearch.toLowerCase()),
@@ -75,6 +74,7 @@ export function RoomDetail() {
     dispatch({
       type: 'CREATE_PLAYLIST',
       name: plName.trim(),
+      roomId: room.id,
       loop: plLoop,
       items,
     });
@@ -84,119 +84,130 @@ export function RoomDetail() {
   return (
     <Layout title={room.name}>
       <div className="space-y-4 px-2 pt-2">
-        {/* ── Quick actions ── */}
-        <NeoCard>
-          <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-3">
-            Quick Actions
-          </p>
-          <div className="flex flex-wrap gap-2">
-            <NeoButton
-              size="sm"
-              onClick={() => dispatch({ type: 'SET_AMBIENT', roomId: room.id })}
-            >
-              Ambient
-            </NeoButton>
-            <NeoButton
-              size="sm"
-              onClick={() =>
-                dispatch({ type: 'RETURN_TO_DEFAULT', roomId: room.id })
-              }
-            >
-              Return to Default
-            </NeoButton>
+        {/* ── Room status header ── */}
+        <NeoCard padding="sm" className="flex items-center gap-3">
+          <StatusBadge variant={statusVariant}>
+            {roomStatus}
+          </StatusBadge>
+          <span className="text-xs text-neo-muted">
+            {screenCount} screen{screenCount !== 1 ? 's' : ''}
+          </span>
+        </NeoCard>
+
+        {/* ── Playlists ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest">
+              Playlists ({roomPlaylists.length})
+            </p>
             <NeoButton
               size="sm"
               variant="primary"
               onClick={openNewPlaylist}
               icon={<Plus size={13} />}
             >
-              New Playlist
+              New
             </NeoButton>
-            {hasSyncGroup && syncGroupId && (
-              <NeoToggle
-                checked={syncEnabled}
-                onChange={() =>
-                  dispatch({ type: 'TOGGLE_SYNC', groupId: syncGroupId })
-                }
-                label="Sync Screens"
-              />
-            )}
           </div>
-        </NeoCard>
 
-        {/* ── Tour Path theme switcher ── */}
-        {isTourPath && (
-          <NeoCard>
-            <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-3">
-              Theme
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {TOUR_THEMES.map((theme) => (
-                <NeoButton
-                  key={theme}
-                  size="sm"
-                  onClick={() =>
-                    dispatch({ type: 'SET_TOUR_THEME', theme })
-                  }
-                >
-                  {theme}
-                </NeoButton>
-              ))}
+          {roomPlaylists.length === 0 ? (
+            <NeoCard className="py-10 text-center">
+              <p className="text-neo-muted">No playlists yet.</p>
+              <p className="text-xs text-neo-muted mt-1">Tap "New" to create one.</p>
+            </NeoCard>
+          ) : (
+            <div className="space-y-2.5">
+              {roomPlaylists.map((pl) => {
+                const runtime = pl.items.reduce((sum, item) => {
+                  const a = state.assets.find((a) => a.id === item.assetId);
+                  return sum + (a?.durationSec ?? 0);
+                }, 0);
+                const isActive = pl.id === activePlaylistId;
+
+                return (
+                  <NeoCard
+                    key={pl.id}
+                    className={[
+                      'flex items-center gap-3',
+                      isActive ? 'ring-2 ring-neo-accent/40' : '',
+                    ].join(' ')}
+                    padding="sm"
+                  >
+                    {/* Icon */}
+                    <div
+                      className={[
+                        'w-10 h-10 rounded-neo-sm flex-shrink-0 shadow-neo-inner flex items-center justify-center',
+                        isActive ? 'bg-neo-accent' : 'bg-neo-accent-light',
+                      ].join(' ')}
+                    >
+                      <ListMusic
+                        size={18}
+                        className={isActive ? 'text-white' : 'text-neo-accent'}
+                      />
+                    </div>
+
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-neo-text truncate">
+                          {pl.name}
+                        </span>
+                        {isActive && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-neo-pill bg-neo-accent text-white font-semibold flex-shrink-0">
+                            Now Playing
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-xs text-neo-muted mt-0.5">
+                        {pl.items.length} tracks · {formatDuration(runtime)}
+                        <span
+                          className={[
+                            'ml-1.5 text-[10px] px-1.5 py-0.5 rounded-neo-pill font-semibold',
+                            pl.loop
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-amber-100 text-amber-700',
+                          ].join(' ')}
+                        >
+                          {pl.loop ? 'Loop' : 'Once'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-1.5 flex-shrink-0">
+                      {/* Play on all screens */}
+                      <button
+                        onClick={() =>
+                          dispatch({
+                            type: 'SET_ROOM_PLAYLIST',
+                            roomId: room.id,
+                            playlistId: pl.id,
+                          })
+                        }
+                        className={[
+                          'w-8 h-8 rounded-neo-pill flex items-center justify-center transition-colors',
+                          isActive
+                            ? 'bg-neo-accent text-white shadow-neo-sm'
+                            : 'neo-surface shadow-neo-sm text-neo-muted hover:text-neo-accent',
+                        ].join(' ')}
+                        title={`Play on all ${screenCount} screen${screenCount !== 1 ? 's' : ''}`}
+                      >
+                        <Play size={13} />
+                      </button>
+                      {/* Edit */}
+                      <button
+                        onClick={() => navigate(`/playlists/${pl.id}/edit`)}
+                        className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
+                        title="Edit playlist"
+                      >
+                        <Pencil size={13} />
+                      </button>
+                    </div>
+                  </NeoCard>
+                );
+              })}
             </div>
-          </NeoCard>
-        )}
-
-        {/* ── Endpoint list ── */}
-        <div>
-          <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-3 px-1">
-            Endpoints ({endpoints.length})
-          </p>
-          <div className="space-y-2.5">
-            {endpoints.map((ep) => {
-              const asset = ep.nowPlaying.assetId
-                ? state.assets.find((a) => a.id === ep.nowPlaying.assetId)
-                : null;
-              const playlist = ep.nowPlaying.playlistId
-                ? state.playlists.find((p) => p.id === ep.nowPlaying.playlistId)
-                : null;
-              const nowPlayingLabel =
-                asset?.title ?? playlist?.name ?? 'Nothing';
-
-              return (
-                <NeoCard
-                  key={ep.id}
-                  onClick={() => navigate(`/endpoint/${ep.id}`)}
-                  className="flex items-center gap-3"
-                  padding="sm"
-                >
-                  {/* Color swatch */}
-                  <div
-                    className="w-10 h-10 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
-                    style={{ backgroundColor: asset?.color ?? '#7a7670' }}
-                  />
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-semibold text-neo-text truncate">
-                      {ep.name}
-                    </div>
-                    <div className="text-xs text-neo-muted truncate mt-0.5">
-                      {ep.nowPlaying.mode === 'playlist' ? '▶ Playlist: ' : '▶ '}
-                      {nowPlayingLabel}
-                    </div>
-                  </div>
-
-                  {/* Status + chevron */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <StatusBadge variant={statusVariantFromEndpoint(ep.status)}>
-                      {ep.status}
-                    </StatusBadge>
-                    <ChevronRight size={14} className="text-neo-muted" />
-                  </div>
-                </NeoCard>
-              );
-            })}
-          </div>
+          )}
         </div>
       </div>
 
@@ -274,7 +285,6 @@ export function RoomDetail() {
                         : 'neo-surface shadow-neo-sm hover:shadow-neo',
                     ].join(' ')}
                   >
-                    {/* Checkbox */}
                     <div
                       className={[
                         'w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center border-2 transition-colors',
@@ -289,14 +299,10 @@ export function RoomDetail() {
                         </svg>
                       )}
                     </div>
-
-                    {/* Thumbnail */}
                     <div
                       className="w-10 h-8 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
                       style={{ backgroundColor: asset.color }}
                     />
-
-                    {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-semibold text-neo-text truncate">
                         {asset.title}
@@ -313,11 +319,7 @@ export function RoomDetail() {
 
           {/* Actions */}
           <div className="flex gap-3 pt-1">
-            <NeoButton
-              variant="secondary"
-              fullWidth
-              onClick={() => setNewPlaylistOpen(false)}
-            >
+            <NeoButton variant="secondary" fullWidth onClick={() => setNewPlaylistOpen(false)}>
               Cancel
             </NeoButton>
             <NeoButton variant="primary" fullWidth onClick={createPlaylist}>

@@ -95,12 +95,14 @@ export const mockAssets: Asset[] = [
   },
 ];
 
-// ─── PLAYLISTS ─────────────────────────────────────────────────────────────────
+// ─── PLAYLISTS (room-scoped) ───────────────────────────────────────────────────
 
 export const mockPlaylists: Playlist[] = [
+  // ── Lobby ──────────────────────────────────────────────────────────────────
   {
-    id: 'ambient',
-    name: 'Ambient',
+    id: 'lobby-default',
+    name: 'Default',
+    roomId: 'lobby',
     loop: true,
     items: [
       { assetId: 'mammoth-loop', order: 0 },
@@ -109,8 +111,9 @@ export const mockPlaylists: Playlist[] = [
     ],
   },
   {
-    id: 'investor',
-    name: 'Investor',
+    id: 'lobby-origin-story',
+    name: 'Origin Story',
+    roomId: 'lobby',
     loop: false,
     items: [
       { assetId: 'investor-overview', order: 0 },
@@ -119,23 +122,162 @@ export const mockPlaylists: Playlist[] = [
     ],
   },
   {
-    id: 'press-tour',
-    name: 'Press Tour',
-    loop: false,
+    id: 'lobby-specimen-archive',
+    name: 'Specimen Archive',
+    roomId: 'lobby',
+    loop: true,
     items: [
-      { assetId: 'press-reel', order: 0 },
-      { assetId: 'dodo-feature', order: 1 },
-      { assetId: 'investor-overview', order: 2 },
+      { assetId: 'partner-welcome', order: 0 },
+      { assetId: 'mammoth-loop', order: 1 },
+      { assetId: 'dodo-walk', order: 2 },
+    ],
+  },
+
+  // ── Automation Suite ───────────────────────────────────────────────────────
+  {
+    id: 'auto-default',
+    name: 'Default',
+    roomId: 'automation-suite',
+    loop: true,
+    items: [
+      { assetId: 'mammoth-loop', order: 0 },
+      { assetId: 'thylacine-day', order: 1 },
     ],
   },
   {
-    id: 'partner-visit',
-    name: 'Partner Visit',
+    id: 'auto-fossil-record',
+    name: 'Fossil Record',
+    roomId: 'automation-suite',
+    loop: true,
+    items: [
+      { assetId: 'dodo-walk', order: 0 },
+      { assetId: 'thylacine-day', order: 1 },
+      { assetId: 'dodo-feature', order: 2 },
+    ],
+  },
+  {
+    id: 'auto-extinction-protocol',
+    name: 'Extinction Protocol',
+    roomId: 'automation-suite',
+    loop: false,
+    items: [
+      { assetId: 'investor-overview', order: 0 },
+      { assetId: 'press-reel', order: 1 },
+    ],
+  },
+
+  // ── Megalodon Room ─────────────────────────────────────────────────────────
+  {
+    id: 'mega-ambient',
+    name: 'Ambient',
+    roomId: 'megalodon-room',
+    loop: true,
+    items: [
+      { assetId: 'mammoth-loop', order: 0 },
+      { assetId: 'thylacine-day', order: 1 },
+      { assetId: 'dodo-walk', order: 2 },
+    ],
+  },
+  {
+    id: 'mega-investor-story',
+    name: 'Investor Story',
+    roomId: 'megalodon-room',
+    loop: false,
+    items: [
+      { assetId: 'investor-overview', order: 0 },
+      { assetId: 'mammoth-highlight', order: 1 },
+      { assetId: 'press-reel', order: 2 },
+    ],
+  },
+  {
+    id: 'mega-wayfinding',
+    name: 'Wayfinding',
+    roomId: 'megalodon-room',
+    loop: true,
+    items: [
+      { assetId: 'partner-welcome', order: 0 },
+      { assetId: 'mammoth-loop', order: 1 },
+    ],
+  },
+  {
+    id: 'mega-deep-sea',
+    name: 'Deep Sea',
+    roomId: 'megalodon-room',
+    loop: true,
+    items: [
+      { assetId: 'dodo-walk', order: 0 },
+      { assetId: 'dodo-feature', order: 1 },
+      { assetId: 'thylacine-night', order: 2 },
+    ],
+  },
+
+  // ── Social Den ─────────────────────────────────────────────────────────────
+  {
+    id: 'social-default',
+    name: 'Default',
+    roomId: 'social-den',
     loop: true,
     items: [
       { assetId: 'partner-welcome', order: 0 },
       { assetId: 'mammoth-loop', order: 1 },
       { assetId: 'thylacine-day', order: 2 },
+    ],
+  },
+  {
+    id: 'social-synthesis-lab',
+    name: 'Synthesis Lab',
+    roomId: 'social-den',
+    loop: true,
+    items: [
+      { assetId: 'press-reel', order: 0 },
+      { assetId: 'dodo-feature', order: 1 },
+      { assetId: 'kids-corner', order: 2 },
+    ],
+  },
+  {
+    id: 'social-deep-time',
+    name: 'Deep Time',
+    roomId: 'social-den',
+    loop: false,
+    items: [
+      { assetId: 'investor-overview', order: 0 },
+      { assetId: 'mammoth-highlight', order: 1 },
+      { assetId: 'thylacine-night', order: 2 },
+    ],
+  },
+
+  // ── Tour Path ──────────────────────────────────────────────────────────────
+  {
+    id: 'tour-default',
+    name: 'Default',
+    roomId: 'tour-path',
+    loop: true,
+    items: [
+      { assetId: 'mammoth-loop', order: 0 },
+      { assetId: 'thylacine-day', order: 1 },
+      { assetId: 'dodo-walk', order: 2 },
+    ],
+  },
+  {
+    id: 'tour-migration-path',
+    name: 'Migration Path',
+    roomId: 'tour-path',
+    loop: false,
+    items: [
+      { assetId: 'mammoth-highlight', order: 0 },
+      { assetId: 'dodo-feature', order: 1 },
+      { assetId: 'thylacine-day', order: 2 },
+    ],
+  },
+  {
+    id: 'tour-extinction-event',
+    name: 'Extinction Event',
+    roomId: 'tour-path',
+    loop: true,
+    items: [
+      { assetId: 'thylacine-night', order: 0 },
+      { assetId: 'dodo-walk', order: 1 },
+      { assetId: 'mammoth-loop', order: 2 },
     ],
   },
 ];
@@ -151,12 +293,12 @@ export const mockRooms: Room[] = [
   {
     id: 'automation-suite',
     name: 'Automation Suite',
-    endpointIds: ['auto-nano-1', 'auto-nano-2', 'auto-nano-3'],
+    endpointIds: ['auto-nano-1', 'auto-nano-2'],
   },
   {
     id: 'megalodon-room',
     name: 'Megalodon Room',
-    endpointIds: ['mega-main-wall'],
+    endpointIds: ['mega-wall-1', 'mega-wall-2', 'mega-wall-3'],
   },
   {
     id: 'social-den',
@@ -173,17 +315,16 @@ export const mockRooms: Room[] = [
 // ─── ENDPOINTS ─────────────────────────────────────────────────────────────────
 
 export const mockEndpoints: Endpoint[] = [
-  // Lobby
+  // Lobby (2 screens)
   {
     id: 'lobby-left-led',
     name: 'Lobby – Left LED Wall',
     roomId: 'lobby',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
-    syncGroupId: 'lobby-sync',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'playlist', playlistId: 'ambient', positionSec: 120, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'lobby-default', positionSec: 120, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
@@ -191,79 +332,89 @@ export const mockEndpoints: Endpoint[] = [
     id: 'lobby-led-screen',
     name: 'Lobby – LED Screen',
     roomId: 'lobby',
-    type: 'single',
-    status: 'playing',
-    syncGroupId: 'lobby-sync',
-    defaultMode: 'ambient',
-    nowPlaying: { mode: 'playlist', playlistId: 'ambient', positionSec: 120, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
-    loop: true,
-    brightness: 100,
-  },
-
-  // Automation Suite
-  {
-    id: 'auto-nano-1',
-    name: 'Automation – Nano 1',
-    roomId: 'automation-suite',
-    type: 'single',
-    status: 'playing',
-    defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'mammoth-loop', positionSec: 0, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: true },
-    loop: true,
-    brightness: 80,
-  },
-  {
-    id: 'auto-nano-2',
-    name: 'Automation – Nano 2',
-    roomId: 'automation-suite',
-    type: 'single',
-    status: 'paused',
-    defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'dodo-walk', positionSec: 450, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: true },
-    loop: false,
-    brightness: 75,
-  },
-  {
-    id: 'auto-nano-3',
-    name: 'Automation – Nano 3',
-    roomId: 'automation-suite',
-    type: 'single',
-    status: 'offline',
-    defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'thylacine-day', positionSec: 0, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: true },
-    loop: true,
-    brightness: 100,
-  },
-
-  // Megalodon Room
-  {
-    id: 'mega-main-wall',
-    name: 'Megalodon – Main Wall',
-    roomId: 'megalodon-room',
     type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'playlist', playlistId: 'ambient', positionSec: 0, currentItemIndex: 0 },
+    nowPlaying: { mode: 'playlist', playlistId: 'lobby-default', positionSec: 120, currentItemIndex: 0 },
     supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
 
-  // Social Den
+  // Automation Suite (2 screens)
+  {
+    id: 'auto-nano-1',
+    name: 'Automation – Screen 1',
+    roomId: 'automation-suite',
+    type: 'playlist',
+    status: 'playing',
+    defaultMode: 'ambient',
+    nowPlaying: { mode: 'playlist', playlistId: 'auto-default', positionSec: 0, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true },
+    loop: true,
+    brightness: 80,
+  },
+  {
+    id: 'auto-nano-2',
+    name: 'Automation – Screen 2',
+    roomId: 'automation-suite',
+    type: 'playlist',
+    status: 'playing',
+    defaultMode: 'ambient',
+    nowPlaying: { mode: 'playlist', playlistId: 'auto-default', positionSec: 0, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true },
+    loop: true,
+    brightness: 80,
+  },
+
+  // Megalodon Room (3 screens)
+  {
+    id: 'mega-wall-1',
+    name: 'Megalodon – Wall 1',
+    roomId: 'megalodon-room',
+    type: 'playlist',
+    status: 'playing',
+    defaultMode: 'ambient',
+    nowPlaying: { mode: 'playlist', playlistId: 'mega-ambient', positionSec: 0, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
+    loop: true,
+    brightness: 100,
+  },
+  {
+    id: 'mega-wall-2',
+    name: 'Megalodon – Wall 2',
+    roomId: 'megalodon-room',
+    type: 'playlist',
+    status: 'playing',
+    defaultMode: 'ambient',
+    nowPlaying: { mode: 'playlist', playlistId: 'mega-ambient', positionSec: 0, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
+    loop: true,
+    brightness: 100,
+  },
+  {
+    id: 'mega-wall-3',
+    name: 'Megalodon – Wall 3',
+    roomId: 'megalodon-room',
+    type: 'playlist',
+    status: 'playing',
+    defaultMode: 'ambient',
+    nowPlaying: { mode: 'playlist', playlistId: 'mega-ambient', positionSec: 0, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
+    loop: true,
+    brightness: 100,
+  },
+
+  // Social Den (2 screens)
   {
     id: 'social-screen-1',
     name: 'Social Den – Screen 1',
     roomId: 'social-den',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
-    syncGroupId: 'social-sync',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'partner-welcome', positionSec: 10, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'social-default', positionSec: 10, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
@@ -271,26 +422,25 @@ export const mockEndpoints: Endpoint[] = [
     id: 'social-screen-2',
     name: 'Social Den – Screen 2',
     roomId: 'social-den',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
-    syncGroupId: 'social-sync',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'partner-welcome', positionSec: 10, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'social-default', positionSec: 10, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
 
-  // Tour Path
+  // Tour Path (3 screens)
   {
     id: 'tour-wall-1',
     name: 'Tour Path – Wall 1',
     roomId: 'tour-path',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'mammoth-loop', positionSec: 600, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
@@ -298,11 +448,11 @@ export const mockEndpoints: Endpoint[] = [
     id: 'tour-wall-2',
     name: 'Tour Path – Wall 2',
     roomId: 'tour-path',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'mammoth-loop', positionSec: 600, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
@@ -310,11 +460,11 @@ export const mockEndpoints: Endpoint[] = [
     id: 'tour-wall-3',
     name: 'Tour Path – Wall 3',
     roomId: 'tour-path',
-    type: 'single',
+    type: 'playlist',
     status: 'playing',
     defaultMode: 'ambient',
-    nowPlaying: { mode: 'asset', assetId: 'mammoth-loop', positionSec: 600, currentItemIndex: 0 },
-    supports: { playPause: true, restart: true, loop: true, skip: false, brightness: false },
+    nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 },
+    supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false },
     loop: true,
     brightness: 100,
   },
@@ -327,77 +477,75 @@ export const mockPresets: Preset[] = [
     id: 'investor-day',
     name: 'Investor Day',
     description:
-      'Megalodon runs the Investor playlist once; Lobby stays Ambient; Social Den plays Ambient.',
+      'Megalodon runs Investor Story; Lobby and Social Den play Default.',
     changes: [
-      { endpointId: 'mega-main-wall', mode: 'playlist', playlistId: 'investor', status: 'playing' },
-      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
+      { endpointId: 'mega-wall-1', mode: 'playlist', playlistId: 'mega-investor-story', status: 'playing' },
+      { endpointId: 'mega-wall-2', mode: 'playlist', playlistId: 'mega-investor-story', status: 'playing' },
+      { endpointId: 'mega-wall-3', mode: 'playlist', playlistId: 'mega-investor-story', status: 'playing' },
+      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', status: 'playing' },
+      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', status: 'playing' },
     ],
   },
   {
     id: 'press-tour',
     name: 'Press Tour',
     description:
-      'Tour Path set to Dodo theme; Social Den runs Press Tour playlist; Lobby stays Ambient.',
+      'Tour Path runs Migration Path; Social Den plays Synthesis Lab; Lobby stays Default.',
     changes: [
-      { endpointId: 'tour-wall-1', mode: 'asset', assetId: 'dodo-walk', status: 'playing' },
-      { endpointId: 'tour-wall-2', mode: 'asset', assetId: 'dodo-walk', status: 'playing' },
-      { endpointId: 'tour-wall-3', mode: 'asset', assetId: 'dodo-walk', status: 'playing' },
-      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'press-tour', status: 'playing' },
-      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'press-tour', status: 'playing' },
-      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
+      { endpointId: 'tour-wall-1', mode: 'playlist', playlistId: 'tour-migration-path', status: 'playing' },
+      { endpointId: 'tour-wall-2', mode: 'playlist', playlistId: 'tour-migration-path', status: 'playing' },
+      { endpointId: 'tour-wall-3', mode: 'playlist', playlistId: 'tour-migration-path', status: 'playing' },
+      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-synthesis-lab', status: 'playing' },
+      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-synthesis-lab', status: 'playing' },
+      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
     ],
   },
   {
     id: 'after-hours',
     name: 'After Hours',
     description:
-      'Dims and pauses non-essential screens; Lobby falls back to looping Ambient.',
+      'Pauses non-essential screens; Lobby loops Default.',
     changes: [
-      { endpointId: 'mega-main-wall', mode: 'playlist', playlistId: 'ambient', status: 'paused' },
-      { endpointId: 'auto-nano-1', mode: 'asset', assetId: 'mammoth-loop', status: 'paused' },
-      { endpointId: 'auto-nano-2', mode: 'asset', assetId: 'mammoth-loop', status: 'offline' },
-      { endpointId: 'auto-nano-3', mode: 'asset', assetId: 'mammoth-loop', status: 'offline' },
-      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'ambient', status: 'paused' },
-      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'ambient', status: 'paused' },
-      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'tour-wall-1', mode: 'asset', assetId: 'mammoth-loop', status: 'offline' },
-      { endpointId: 'tour-wall-2', mode: 'asset', assetId: 'mammoth-loop', status: 'offline' },
-      { endpointId: 'tour-wall-3', mode: 'asset', assetId: 'mammoth-loop', status: 'offline' },
+      { endpointId: 'mega-wall-1', mode: 'playlist', playlistId: 'mega-ambient', status: 'paused' },
+      { endpointId: 'mega-wall-2', mode: 'playlist', playlistId: 'mega-ambient', status: 'paused' },
+      { endpointId: 'mega-wall-3', mode: 'playlist', playlistId: 'mega-ambient', status: 'paused' },
+      { endpointId: 'auto-nano-1', mode: 'playlist', playlistId: 'auto-default', status: 'offline' },
+      { endpointId: 'auto-nano-2', mode: 'playlist', playlistId: 'auto-default', status: 'offline' },
+      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', status: 'paused' },
+      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', status: 'paused' },
+      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'tour-wall-1', mode: 'playlist', playlistId: 'tour-default', status: 'offline' },
+      { endpointId: 'tour-wall-2', mode: 'playlist', playlistId: 'tour-default', status: 'offline' },
+      { endpointId: 'tour-wall-3', mode: 'playlist', playlistId: 'tour-default', status: 'offline' },
     ],
   },
   {
     id: 'general-tour',
     name: 'General Tour',
     description:
-      'Tour Path shows Mammoth theme; everywhere else plays Ambient.',
+      'Tour Path plays Default; all other rooms play their Default playlists.',
     changes: [
-      { endpointId: 'tour-wall-1', mode: 'asset', assetId: 'mammoth-loop', status: 'playing' },
-      { endpointId: 'tour-wall-2', mode: 'asset', assetId: 'mammoth-loop', status: 'playing' },
-      { endpointId: 'tour-wall-3', mode: 'asset', assetId: 'mammoth-loop', status: 'playing' },
-      { endpointId: 'mega-main-wall', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'auto-nano-1', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'auto-nano-2', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
-      { endpointId: 'auto-nano-3', mode: 'playlist', playlistId: 'ambient', status: 'playing' },
+      { endpointId: 'tour-wall-1', mode: 'playlist', playlistId: 'tour-default', status: 'playing' },
+      { endpointId: 'tour-wall-2', mode: 'playlist', playlistId: 'tour-default', status: 'playing' },
+      { endpointId: 'tour-wall-3', mode: 'playlist', playlistId: 'tour-default', status: 'playing' },
+      { endpointId: 'mega-wall-1', mode: 'playlist', playlistId: 'mega-ambient', status: 'playing' },
+      { endpointId: 'mega-wall-2', mode: 'playlist', playlistId: 'mega-ambient', status: 'playing' },
+      { endpointId: 'mega-wall-3', mode: 'playlist', playlistId: 'mega-ambient', status: 'playing' },
+      { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', status: 'playing' },
+      { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', status: 'playing' },
+      { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', status: 'playing' },
+      { endpointId: 'auto-nano-1', mode: 'playlist', playlistId: 'auto-default', status: 'playing' },
+      { endpointId: 'auto-nano-2', mode: 'playlist', playlistId: 'auto-default', status: 'playing' },
     ],
   },
 ];
 
-// ─── TOUR THEME MAP ────────────────────────────────────────────────────────────
-
-export const tourThemeAssets: Record<string, string> = {
-  Mammoth: 'mammoth-loop',
-  Dodo: 'dodo-walk',
-  Thylacine: 'thylacine-day',
-};
+// ─── CONSTANTS ─────────────────────────────────────────────────────────────────
 
 export const ALL_TAGS = [
   'Mammoth',
@@ -408,3 +556,12 @@ export const ALL_TAGS = [
   'Press',
   'Kids',
 ];
+
+// Screen count per room for informational display
+export const ROOM_SCREEN_COUNT: Record<string, number> = {
+  lobby: 2,
+  'automation-suite': 2,
+  'megalodon-room': 3,
+  'social-den': 2,
+  'tour-path': 3,
+};

@@ -43,7 +43,7 @@ export function EndpointDetail() {
     );
   }
 
-  const isMegalodon = ep.id === 'mega-main-wall';
+  const isMegalodon = ep.roomId === 'megalodon-room';
   const nowAsset = ep.nowPlaying.assetId
     ? state.assets.find((a) => a.id === ep.nowPlaying.assetId)
     : null;
@@ -267,14 +267,14 @@ export function EndpointDetail() {
               </NeoButton>
             )}
 
-            {/* Return to Ambient */}
+            {/* Return to Default */}
             <NeoButton
               size="sm"
               onClick={() =>
                 dispatch({ type: 'SET_AMBIENT', endpointId: ep.id })
               }
             >
-              Return to Ambient
+              Return to Default
             </NeoButton>
 
             {/* Megalodon special: Run Investor Once */}

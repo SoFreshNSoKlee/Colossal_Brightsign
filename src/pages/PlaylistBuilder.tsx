@@ -13,6 +13,7 @@ import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
 import { BottomSheetModal } from '../components/design-system/BottomSheetModal';
 import { useApp } from '../context/AppContext';
+import { ROOM_SCREEN_COUNT } from '../mock/data';
 
 function formatDuration(sec: number): string {
   if (sec >= 3600) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
@@ -29,6 +30,10 @@ export function PlaylistBuilder() {
   const [saved, setSaved] = useState(false);
 
   const playlist = state.playlists.find((p) => p.id === playlistId);
+
+  const [editName, setEditName] = useState(playlist?.name ?? '');
+  const [editLoop, setEditLoop] = useState(playlist?.loop ?? true);
+
   if (!playlist) {
     return (
       <Layout>
@@ -36,6 +41,9 @@ export function PlaylistBuilder() {
       </Layout>
     );
   }
+
+  const room = state.rooms.find((r) => r.id === playlist.roomId);
+  const screenCount = ROOM_SCREEN_COUNT[playlist.roomId] ?? 1;
 
   const sortedItems = [...playlist.items].sort((a, b) => a.order - b.order);
 
@@ -52,6 +60,13 @@ export function PlaylistBuilder() {
   }, 0);
 
   const handleSave = () => {
+    if (!editName.trim()) return;
+    dispatch({
+      type: 'UPDATE_PLAYLIST_META',
+      playlistId: playlist.id,
+      name: editName.trim(),
+      loop: editLoop,
+    });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -61,22 +76,52 @@ export function PlaylistBuilder() {
       <div className="space-y-4 px-2 pt-2">
         {/* ── Playlist header ── */}
         <NeoCard>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-neo-text">{playlist.name}</h2>
-              <p className="text-xs text-neo-muted mt-0.5">
-                {sortedItems.length} tracks · {formatDuration(totalRuntime)}
-                {playlist.loop ? ' · Loops' : ' · Plays once'}
-              </p>
-            </div>
-            <NeoButton
-              variant={saved ? 'success' : 'primary'}
-              size="sm"
-              onClick={handleSave}
+          {/* Room context */}
+          {room && (
+            <p className="text-xs text-neo-muted mb-3">
+              {room.name} · {screenCount} screen{screenCount !== 1 ? 's' : ''}
+            </p>
+          )}
+
+          {/* Editable name */}
+          <input
+            type="text"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-inner text-base font-bold text-neo-text focus:outline-none mb-2"
+          />
+
+          <p className="text-xs text-neo-muted mb-3">
+            {sortedItems.length} tracks · {formatDuration(totalRuntime)}
+          </p>
+
+          {/* Loop toggle */}
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-neo-muted uppercase tracking-widest">Loop</span>
+            <button
+              onClick={() => setEditLoop((v) => !v)}
+              className={[
+                'relative w-12 h-6 rounded-neo-pill transition-colors flex-shrink-0',
+                editLoop ? 'bg-neo-accent' : 'bg-neo-dark',
+              ].join(' ')}
             >
-              {saved ? '✓ Saved' : 'Save'}
-            </NeoButton>
+              <span
+                className={[
+                  'absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all',
+                  editLoop ? 'left-6' : 'left-0.5',
+                ].join(' ')}
+              />
+            </button>
           </div>
+
+          <NeoButton
+            variant={saved ? 'success' : 'primary'}
+            size="sm"
+            onClick={handleSave}
+            fullWidth
+          >
+            {saved ? '✓ Saved' : 'Save Changes'}
+          </NeoButton>
         </NeoCard>
 
         {/* ── Track list ── */}

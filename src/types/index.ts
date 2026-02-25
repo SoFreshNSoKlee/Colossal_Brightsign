@@ -57,6 +57,7 @@ export interface PlaylistItem {
 export interface Playlist {
   id: PlaylistId;
   name: string;
+  roomId: RoomId;
   items: PlaylistItem[];
   loop: boolean;
 }
@@ -100,6 +101,7 @@ export type AppAction =
   | { type: 'SKIP_PREV'; endpointId: EndpointId }
   | { type: 'SWAP_ASSET'; endpointId: EndpointId; assetId: AssetId }
   | { type: 'CHOOSE_PLAYLIST'; endpointId: EndpointId; playlistId: PlaylistId }
+  | { type: 'SET_ROOM_PLAYLIST'; roomId: RoomId; playlistId: PlaylistId }
   | { type: 'TOGGLE_SYNC'; groupId: string }
   | { type: 'APPLY_PRESET'; presetId: string }
   | { type: 'SET_AMBIENT'; endpointId?: EndpointId; roomId?: RoomId }
@@ -108,7 +110,6 @@ export type AppAction =
   | { type: 'REORDER_PLAYLIST'; playlistId: PlaylistId; fromIdx: number; toIdx: number }
   | { type: 'ADD_PLAYLIST_ITEM'; playlistId: PlaylistId; assetId: AssetId }
   | { type: 'REMOVE_PLAYLIST_ITEM'; playlistId: PlaylistId; assetId: AssetId }
-  | { type: 'SET_TOUR_THEME'; theme: 'Thylacine' | 'Dodo' | 'Mammoth' }
   | { type: 'SET_BRIGHTNESS'; endpointId: EndpointId; value: number }
   | { type: 'TOGGLE_THEME' }
   | { type: 'SET_FILTER'; filters: string[] }
@@ -117,7 +118,7 @@ export type AppAction =
   | { type: 'UPDATE_ASSET'; assetId: AssetId; updates: Partial<Omit<Asset, 'id'>> }
   | { type: 'DELETE_ASSET'; assetId: AssetId }
   // Playlist CRUD
-  | { type: 'CREATE_PLAYLIST'; name: string; loop: boolean; items?: PlaylistItem[] }
+  | { type: 'CREATE_PLAYLIST'; name: string; roomId: RoomId; loop: boolean; items?: PlaylistItem[] }
   | { type: 'UPDATE_PLAYLIST_META'; playlistId: PlaylistId; name: string; loop: boolean }
   | { type: 'DELETE_PLAYLIST'; playlistId: PlaylistId }
   // Preset CRUD

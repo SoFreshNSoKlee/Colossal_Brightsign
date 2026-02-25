@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ListMusic, Film, Plus, Pencil, Trash2, X } from 'lucide-react';
+import { Search, ListMusic, Film, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -88,6 +88,7 @@ export function Library() {
   const [playlistModal, setPlaylistModal] = useState<'create' | null>(null);
   const [plName, setPlName] = useState('');
   const [plLoop, setPlLoop] = useState(true);
+  const [plRoomId, setPlRoomId] = useState('');
 
   const toggleTag = (tag: string) => {
     setActiveTags((prev) =>
@@ -178,12 +179,13 @@ export function Library() {
   const openCreatePlaylist = () => {
     setPlName('');
     setPlLoop(true);
+    setPlRoomId(state.rooms[0]?.id ?? '');
     setPlaylistModal('create');
   };
 
   const savePlaylist = () => {
-    if (!plName.trim()) return;
-    dispatch({ type: 'CREATE_PLAYLIST', name: plName.trim(), loop: plLoop });
+    if (!plName.trim() || !plRoomId) return;
+    dispatch({ type: 'CREATE_PLAYLIST', name: plName.trim(), roomId: plRoomId, loop: plLoop });
     setPlaylistModal(null);
   };
 
@@ -334,6 +336,7 @@ export function Library() {
                 const a = state.assets.find((a) => a.id === item.assetId);
                 return sum + (a?.durationSec ?? 0);
               }, 0);
+              const plRoom = state.rooms.find((r) => r.id === pl.roomId);
 
               return (
                 <NeoCard key={pl.id} className="flex items-center gap-4">
@@ -348,7 +351,7 @@ export function Library() {
                     <div className="text-xs text-neo-muted mt-0.5">
                       {pl.items.length} tracks · {formatDuration(runtime)}
                     </div>
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex flex-wrap gap-1.5 mt-1">
                       <span
                         className={[
                           'text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold',
@@ -359,6 +362,11 @@ export function Library() {
                       >
                         {pl.loop ? 'Loop' : 'Once'}
                       </span>
+                      {plRoom && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-neo-pill font-semibold bg-neo-accent-light text-neo-accent">
+                          {plRoom.name}
+                        </span>
+                      )}
                     </div>
                   </div>
 
@@ -526,6 +534,22 @@ export function Library() {
               placeholder="Playlist name…"
               className="w-full px-4 py-2.5 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none"
             />
+          </div>
+
+          {/* Room picker */}
+          <div>
+            <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
+              Room
+            </label>
+            <select
+              value={plRoomId}
+              onChange={(e) => setPlRoomId(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text focus:outline-none"
+            >
+              {state.rooms.map((r) => (
+                <option key={r.id} value={r.id}>{r.name}</option>
+              ))}
+            </select>
           </div>
 
           {/* Loop toggle */}

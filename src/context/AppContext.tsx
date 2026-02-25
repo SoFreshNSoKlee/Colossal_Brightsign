@@ -5,14 +5,13 @@ import React, {
   useEffect,
   type Dispatch,
 } from 'react';
-import type { AppState, AppAction, Endpoint, NowPlaying, Asset } from '../types';
+import type { AppState, AppAction, Endpoint, RoomId, Asset } from '../types';
 import {
   mockAssets,
   mockEndpoints,
   mockPlaylists,
   mockPresets,
   mockRooms,
-  tourThemeAssets,
 } from '../mock/data';
 
 // ─── INITIAL STATE ─────────────────────────────────────────────────────────────
@@ -32,13 +31,9 @@ const initialState: AppState = {
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
 
-function ambientNowPlaying(): NowPlaying {
-  return {
-    mode: 'playlist',
-    playlistId: 'ambient',
-    positionSec: 0,
-    currentItemIndex: 0,
-  };
+function getDefaultPlaylistId(state: AppState, roomId: RoomId): string {
+  const pl = state.playlists.find((p) => p.roomId === roomId);
+  return pl?.id ?? '';
 }
 
 function updateEndpoints(
@@ -112,11 +107,7 @@ function reducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], (e) => ({
-          nowPlaying: {
-            ...e.nowPlaying,
-            currentItemIndex: next,
-            positionSec: 0,
-          },
+          nowPlaying: { ...e.nowPlaying, currentItemIndex: next, positionSec: 0 },
         })),
       };
     }
@@ -134,11 +125,7 @@ function reducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], (e) => ({
-          nowPlaying: {
-            ...e.nowPlaying,
-            currentItemIndex: prev,
-            positionSec: 0,
-          },
+          nowPlaying: { ...e.nowPlaying, currentItemIndex: prev, positionSec: 0 },
         })),
       };
     }
@@ -175,7 +162,27 @@ function reducer(state: AppState, action: AppAction): AppState {
       };
     }
 
-    // ── Sync group ────────────────────────────────────────────────────────────
+    // ── Set playlist for entire room ───────────────────────────────────────────
+
+    case 'SET_ROOM_PLAYLIST': {
+      const ids = state.endpoints
+        .filter((ep) => ep.roomId === action.roomId)
+        .map((ep) => ep.id);
+      return {
+        ...state,
+        endpoints: updateEndpoints(state.endpoints, ids, () => ({
+          status: 'playing',
+          nowPlaying: {
+            mode: 'playlist',
+            playlistId: action.playlistId,
+            positionSec: 0,
+            currentItemIndex: 0,
+          },
+        })),
+      };
+    }
+
+    // ── Sync group (kept for compatibility) ───────────────────────────────────
 
     case 'TOGGLE_SYNC': {
       const current = state.uiState.syncGroups[action.groupId] ?? false;
@@ -183,10 +190,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         ...state,
         uiState: {
           ...state.uiState,
-          syncGroups: {
-            ...state.uiState.syncGroups,
-            [action.groupId]: !current,
-          },
+          syncGroups: { ...state.uiState.syncGroups, [action.groupId]: !current },
         },
       };
     }
@@ -196,9 +200,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'APPLY_PRESET': {
       const preset = state.presets.find((p) => p.id === action.presetId);
       if (!preset) return state;
-
       let endpoints = [...state.endpoints];
-
       preset.changes.forEach((change) => {
         endpoints = updateEndpoints(endpoints, [change.endpointId], () => ({
           status: change.status ?? 'playing',
@@ -211,61 +213,71 @@ function reducer(state: AppState, action: AppAction): AppState {
           },
         }));
       });
-
       return { ...state, endpoints };
     }
 
-    // ── Set Ambient ────────────────────────────────────────────────────────────
+    // ── Set Default (formerly Set Ambient) ────────────────────────────────────
 
     case 'SET_AMBIENT': {
       let ids: string[] = [];
+      let roomId: string | undefined = action.roomId;
       if (action.endpointId) {
-        ids = [action.endpointId];
+        const ep = state.endpoints.find((e) => e.id === action.endpointId);
+        if (ep) { ids = [action.endpointId]; roomId = ep.roomId; }
       } else if (action.roomId) {
         ids = state.endpoints
           .filter((ep) => ep.roomId === action.roomId)
           .map((ep) => ep.id);
       }
+      const playlistId = roomId ? getDefaultPlaylistId(state, roomId) : '';
+      if (!playlistId) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, ids, () => ({
           status: 'playing',
-          nowPlaying: ambientNowPlaying(),
+          nowPlaying: { mode: 'playlist', playlistId, positionSec: 0, currentItemIndex: 0 },
         })),
       };
     }
-
-    // ── Return to Default ──────────────────────────────────────────────────────
 
     case 'RETURN_TO_DEFAULT': {
       let ids: string[] = [];
+      let roomId: string | undefined = action.roomId;
       if (action.endpointId) {
-        ids = [action.endpointId];
+        const ep = state.endpoints.find((e) => e.id === action.endpointId);
+        if (ep) { ids = [action.endpointId]; roomId = ep.roomId; }
       } else if (action.roomId) {
         ids = state.endpoints
           .filter((ep) => ep.roomId === action.roomId)
           .map((ep) => ep.id);
       }
+      const playlistId = roomId ? getDefaultPlaylistId(state, roomId) : '';
+      if (!playlistId) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, ids, () => ({
           status: 'playing',
-          nowPlaying: ambientNowPlaying(),
+          nowPlaying: { mode: 'playlist', playlistId, positionSec: 0, currentItemIndex: 0 },
         })),
       };
     }
 
-    // ── Run Investor Once (Megalodon special) ──────────────────────────────────
+    // ── Run Investor Once (Megalodon shortcut) ─────────────────────────────────
 
     case 'RUN_INVESTOR_ONCE': {
+      const ep = state.endpoints.find((e) => e.id === action.endpointId);
+      if (!ep) return state;
+      const megaIds = state.endpoints
+        .filter((e) => e.roomId === 'megalodon-room')
+        .map((e) => e.id);
       return {
         ...state,
-        endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
+        endpoints: updateEndpoints(state.endpoints, megaIds, () => ({
           status: 'playing',
           loop: false,
           nowPlaying: {
             mode: 'playlist',
-            playlistId: 'investor',
+            playlistId: 'mega-investor-story',
             positionSec: 0,
             currentItemIndex: 0,
           },
@@ -308,28 +320,6 @@ function reducer(state: AppState, action: AppAction): AppState {
         return { ...pl, items };
       });
       return { ...state, playlists };
-    }
-
-    // ── Tour Path Theme ────────────────────────────────────────────────────────
-
-    case 'SET_TOUR_THEME': {
-      const assetId = tourThemeAssets[action.theme];
-      if (!assetId) return state;
-      const tourIds = state.endpoints
-        .filter((ep) => ep.roomId === 'tour-path')
-        .map((ep) => ep.id);
-      return {
-        ...state,
-        endpoints: updateEndpoints(state.endpoints, tourIds, () => ({
-          status: 'playing',
-          nowPlaying: {
-            mode: 'asset',
-            assetId,
-            positionSec: 0,
-            currentItemIndex: 0,
-          },
-        })),
-      };
     }
 
     // ── Brightness ─────────────────────────────────────────────────────────────
@@ -384,7 +374,6 @@ function reducer(state: AppState, action: AppAction): AppState {
       return {
         ...state,
         assets: state.assets.filter((a) => a.id !== action.assetId),
-        // Remove from all playlists
         playlists: state.playlists.map((pl) => ({
           ...pl,
           items: pl.items
@@ -400,6 +389,7 @@ function reducer(state: AppState, action: AppAction): AppState {
       const newPlaylist = {
         id: makeId('playlist'),
         name: action.name,
+        roomId: action.roomId,
         loop: action.loop,
         items: action.items ?? [],
       };
@@ -464,7 +454,6 @@ function loadState(): AppState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as AppState;
-      // Ensure new fields exist on loaded state
       if (!parsed.uiState.syncGroups) parsed.uiState.syncGroups = {};
       return parsed;
     }
