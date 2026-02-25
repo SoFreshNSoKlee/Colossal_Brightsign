@@ -34,6 +34,7 @@ export function PlaylistBuilder() {
 
   const [editName, setEditName] = useState(playlist?.name ?? '');
   const [editLoop, setEditLoop] = useState(playlist?.loop ?? true);
+  const [editNextPlaylistId, setEditNextPlaylistId] = useState(playlist?.nextPlaylistId ?? '');
 
   if (!playlist) {
     return (
@@ -64,6 +65,7 @@ export function PlaylistBuilder() {
       playlistId: playlist.id,
       name: editName.trim(),
       loop: editLoop,
+      nextPlaylistId: !editLoop ? editNextPlaylistId : undefined,
     });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -145,6 +147,27 @@ export function PlaylistBuilder() {
               />
             </button>
           </div>
+
+          {/* Next playlist (shown when loop is off) */}
+          {!editLoop && (
+            <div className="mb-3">
+              <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
+                Play next
+              </label>
+              <select
+                value={editNextPlaylistId}
+                onChange={(e) => setEditNextPlaylistId(e.target.value)}
+                className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text focus:outline-none"
+              >
+                <option value="">— None (stop after) —</option>
+                {state.playlists
+                  .filter((pl) => pl.id !== playlist.id && pl.roomId === playlist.roomId)
+                  .map((pl) => (
+                    <option key={pl.id} value={pl.id}>{pl.name}</option>
+                  ))}
+              </select>
+            </div>
+          )}
 
           <NeoButton
             variant={saved ? 'success' : 'primary'}

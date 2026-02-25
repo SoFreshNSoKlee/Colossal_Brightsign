@@ -63,6 +63,7 @@ export interface Playlist {
   roomId: RoomId;
   items: PlaylistItem[];
   loop: boolean;
+  nextPlaylistId?: PlaylistId;
 }
 
 export interface PresetChange {
@@ -123,8 +124,8 @@ export type AppAction =
   | { type: 'UPDATE_ASSET'; assetId: AssetId; updates: Partial<Omit<Asset, 'id'>> }
   | { type: 'DELETE_ASSET'; assetId: AssetId }
   // Playlist CRUD
-  | { type: 'CREATE_PLAYLIST'; name: string; roomId: RoomId; loop: boolean; items?: PlaylistItem[] }
-  | { type: 'UPDATE_PLAYLIST_META'; playlistId: PlaylistId; name: string; loop: boolean }
+  | { type: 'CREATE_PLAYLIST'; name: string; roomId: RoomId; loop: boolean; items?: PlaylistItem[]; nextPlaylistId?: PlaylistId }
+  | { type: 'UPDATE_PLAYLIST_META'; playlistId: PlaylistId; name: string; loop: boolean; nextPlaylistId?: PlaylistId }
   | { type: 'DELETE_PLAYLIST'; playlistId: PlaylistId }
   // Preset CRUD
   | { type: 'CREATE_PRESET'; preset: Omit<Preset, 'id'> }

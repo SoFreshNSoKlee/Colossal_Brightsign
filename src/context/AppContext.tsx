@@ -421,16 +421,22 @@ function reducer(state: AppState, action: AppAction): AppState {
         roomId: action.roomId,
         loop: action.loop,
         items: action.items ?? [],
+        ...(action.nextPlaylistId !== undefined && { nextPlaylistId: action.nextPlaylistId }),
       };
       return { ...state, playlists: [...state.playlists, newPlaylist] };
     }
 
     case 'UPDATE_PLAYLIST_META': {
-      const playlists = state.playlists.map((pl) =>
-        pl.id === action.playlistId
-          ? { ...pl, name: action.name, loop: action.loop }
-          : pl,
-      );
+      const playlists = state.playlists.map((pl) => {
+        if (pl.id !== action.playlistId) return pl;
+        const updated = { ...pl, name: action.name, loop: action.loop };
+        if (action.nextPlaylistId !== undefined) {
+          updated.nextPlaylistId = action.nextPlaylistId || undefined;
+        } else {
+          delete updated.nextPlaylistId;
+        }
+        return updated;
+      });
       return { ...state, playlists };
     }
 

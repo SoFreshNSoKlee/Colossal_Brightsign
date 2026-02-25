@@ -7,12 +7,6 @@ import { NeoButton } from '../components/design-system/NeoButton';
 import { useApp } from '../context/AppContext';
 import type { PresetChange, EndpointId } from '../types';
 
-const STATUS_OPTIONS = [
-  { value: 'playing', label: 'Playing' },
-  { value: 'paused', label: 'Paused' },
-  { value: 'offline', label: 'Offline' },
-] as const;
-
 export function PresetBuilder() {
   const { presetId } = useParams<{ presetId: string }>();
   const { state, dispatch } = useApp();
@@ -148,13 +142,6 @@ export function PresetBuilder() {
                         <div className="text-[10px] text-neo-muted uppercase tracking-widest">{room?.name}</div>
                         <div className="text-sm font-bold text-neo-text truncate">{ep.name}</div>
                       </div>
-                      <select
-                        value={change.status ?? 'playing'}
-                        onChange={(e) => updateChange(change.endpointId, { status: e.target.value as 'playing' | 'paused' | 'offline' })}
-                        className="px-2 py-1 rounded-neo-sm neo-surface shadow-neo-inner text-xs text-neo-text focus:outline-none"
-                      >
-                        {STATUS_OPTIONS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
                       <button onClick={() => removeChange(change.endpointId)}
                         className="w-7 h-7 rounded-neo-pill flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors">
                         <Trash2 size={13} />

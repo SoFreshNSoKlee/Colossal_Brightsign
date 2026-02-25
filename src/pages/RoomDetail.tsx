@@ -20,7 +20,7 @@ export function RoomDetail() {
   const navigate = useNavigate();
 
   const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(new Set());
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshingId, setRefreshingId] = useState<string | null>(null);
 
   const togglePlaylistExpand = (playlistId: string) => {
     setExpandedPlaylists((prev) => {
@@ -30,9 +30,9 @@ export function RoomDetail() {
     });
   };
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 800);
+  const handleRefreshEndpoint = (endpointId: string) => {
+    setRefreshingId(endpointId);
+    setTimeout(() => setRefreshingId(null), 800);
   };
 
   const room = state.rooms.find((r) => r.id === roomId);
@@ -241,17 +241,10 @@ export function RoomDetail() {
 
         {/* ── Endpoints section ── */}
         <div>
-          <div className="flex items-center justify-between mb-2 px-1">
+          <div className="flex items-center mb-2 px-1">
             <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest">
               Endpoints ({endpoints.length})
             </p>
-            <button
-              onClick={handleRefresh}
-              className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
-              title="Refresh endpoints"
-            >
-              <RefreshCw size={13} className={refreshing ? 'animate-spin' : ''} />
-            </button>
           </div>
           <div className="space-y-2">
             {endpoints.map((ep) => {
@@ -287,6 +280,13 @@ export function RoomDetail() {
                   <StatusBadge variant={epStatusVariant}>
                     {ep.status}
                   </StatusBadge>
+                  <button
+                    onClick={() => handleRefreshEndpoint(ep.id)}
+                    className="w-7 h-7 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors flex-shrink-0"
+                    title="Refresh endpoint"
+                  >
+                    <RefreshCw size={13} className={refreshingId === ep.id ? 'animate-spin' : ''} />
+                  </button>
                 </NeoCard>
               );
             })}
