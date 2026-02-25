@@ -29,6 +29,7 @@ export interface Endpoint {
   id: EndpointId;
   name: string;
   roomId: RoomId;
+  aspectRatio: string; // Fixed, predefined aspect ratio for this endpoint
   type: 'single' | 'playlist';
   status: 'playing' | 'paused' | 'offline';
   syncGroupId?: string;
@@ -41,17 +42,19 @@ export interface Endpoint {
 
 export interface Asset {
   id: AssetId;
+  endpointId: EndpointId; // Every asset is assigned to a specific endpoint
   title: string;
   tags: string[];
   durationSec: number;
-  aspect: string;
+  aspect: string; // Derived from the assigned endpoint's aspectRatio
   updatedAt: string;
   color: string;
 }
 
 export interface PlaylistItem {
+  endpointId: EndpointId; // Which endpoint this item belongs to
   assetId: AssetId;
-  order: number;
+  order: number; // Order within this endpoint's asset list in the playlist
 }
 
 export interface Playlist {
@@ -107,9 +110,9 @@ export type AppAction =
   | { type: 'SET_AMBIENT'; endpointId?: EndpointId; roomId?: RoomId }
   | { type: 'RETURN_TO_DEFAULT'; endpointId?: EndpointId; roomId?: RoomId }
   | { type: 'RUN_INVESTOR_ONCE'; endpointId: EndpointId }
-  | { type: 'REORDER_PLAYLIST'; playlistId: PlaylistId; fromIdx: number; toIdx: number }
-  | { type: 'ADD_PLAYLIST_ITEM'; playlistId: PlaylistId; assetId: AssetId }
-  | { type: 'REMOVE_PLAYLIST_ITEM'; playlistId: PlaylistId; assetId: AssetId }
+  | { type: 'REORDER_PLAYLIST'; playlistId: PlaylistId; endpointId: EndpointId; fromIdx: number; toIdx: number }
+  | { type: 'ADD_PLAYLIST_ITEM'; playlistId: PlaylistId; endpointId: EndpointId; assetId: AssetId }
+  | { type: 'REMOVE_PLAYLIST_ITEM'; playlistId: PlaylistId; endpointId: EndpointId; assetId: AssetId }
   | { type: 'SET_BRIGHTNESS'; endpointId: EndpointId; value: number }
   | { type: 'TOGGLE_THEME' }
   | { type: 'SET_FILTER'; filters: string[] }

@@ -102,8 +102,10 @@ function reducer(state: AppState, action: AppAction): AppState {
         (p) => p.id === ep.nowPlaying.playlistId,
       );
       if (!playlist) return state;
-      const next =
-        (ep.nowPlaying.currentItemIndex + 1) % playlist.items.length;
+      // Filter items for this specific endpoint
+      const epItems = playlist.items.filter((i) => i.endpointId === action.endpointId);
+      if (epItems.length === 0) return state;
+      const next = (ep.nowPlaying.currentItemIndex + 1) % epItems.length;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], (e) => ({
@@ -119,9 +121,11 @@ function reducer(state: AppState, action: AppAction): AppState {
         (p) => p.id === ep.nowPlaying.playlistId,
       );
       if (!playlist) return state;
+      // Filter items for this specific endpoint
+      const epItems = playlist.items.filter((i) => i.endpointId === action.endpointId);
+      if (epItems.length === 0) return state;
       const prev =
-        (ep.nowPlaying.currentItemIndex - 1 + playlist.items.length) %
-        playlist.items.length;
+        (ep.nowPlaying.currentItemIndex - 1 + epItems.length) % epItems.length;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], (e) => ({
@@ -290,10 +294,18 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'REORDER_PLAYLIST': {
       const playlists = state.playlists.map((pl) => {
         if (pl.id !== action.playlistId) return pl;
-        const items = [...pl.items];
-        const [moved] = items.splice(action.fromIdx, 1);
-        items.splice(action.toIdx, 0, moved);
-        return { ...pl, items: items.map((it, i) => ({ ...it, order: i })) };
+        // Get and sort items for this endpoint
+        const epItems = pl.items
+          .filter((i) => i.endpointId === action.endpointId)
+          .sort((a, b) => a.order - b.order);
+        // Reorder within this endpoint's items
+        const [moved] = epItems.splice(action.fromIdx, 1);
+        epItems.splice(action.toIdx, 0, moved);
+        // Reassign orders for this endpoint's items
+        const reorderedEpItems = epItems.map((it, i) => ({ ...it, order: i }));
+        // Merge back with other endpoints' items
+        const otherItems = pl.items.filter((i) => i.endpointId !== action.endpointId);
+        return { ...pl, items: [...otherItems, ...reorderedEpItems] };
       });
       return { ...state, playlists };
     }
@@ -301,11 +313,19 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'ADD_PLAYLIST_ITEM': {
       const playlists = state.playlists.map((pl) => {
         if (pl.id !== action.playlistId) return pl;
-        const already = pl.items.some((i) => i.assetId === action.assetId);
+        // Check for duplicate within this endpoint's items
+        const already = pl.items.some(
+          (i) => i.endpointId === action.endpointId && i.assetId === action.assetId,
+        );
         if (already) return pl;
+        // Order is the count of existing items for this endpoint
+        const epItemCount = pl.items.filter((i) => i.endpointId === action.endpointId).length;
         return {
           ...pl,
-          items: [...pl.items, { assetId: action.assetId, order: pl.items.length }],
+          items: [
+            ...pl.items,
+            { endpointId: action.endpointId, assetId: action.assetId, order: epItemCount },
+          ],
         };
       });
       return { ...state, playlists };
@@ -314,10 +334,17 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'REMOVE_PLAYLIST_ITEM': {
       const playlists = state.playlists.map((pl) => {
         if (pl.id !== action.playlistId) return pl;
-        const items = pl.items
-          .filter((i) => i.assetId !== action.assetId)
+        // Remove the specific endpoint+asset pair
+        const filtered = pl.items.filter(
+          (i) => !(i.endpointId === action.endpointId && i.assetId === action.assetId),
+        );
+        // Re-index orders for the affected endpoint's remaining items
+        const otherItems = filtered.filter((i) => i.endpointId !== action.endpointId);
+        const epItems = filtered
+          .filter((i) => i.endpointId === action.endpointId)
+          .sort((a, b) => a.order - b.order)
           .map((it, i) => ({ ...it, order: i }));
-        return { ...pl, items };
+        return { ...pl, items: [...otherItems, ...epItems] };
       });
       return { ...state, playlists };
     }
@@ -454,6 +481,17 @@ function loadState(): AppState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved) as AppState;
+      // Migration check: verify new required fields are present.
+      // If any endpoint is missing aspectRatio, or any asset is missing endpointId,
+      // or any playlist item is missing endpointId, reset to fresh initial state.
+      const hasAspectRatio = parsed.endpoints?.every((ep) => 'aspectRatio' in ep);
+      const hasEndpointId = parsed.assets?.every((a) => 'endpointId' in a);
+      const hasItemEndpointId = parsed.playlists?.every((pl) =>
+        pl.items.every((item) => 'endpointId' in item),
+      );
+      if (!hasAspectRatio || !hasEndpointId || !hasItemEndpointId) {
+        return initialState;
+      }
       if (!parsed.uiState.syncGroups) parsed.uiState.syncGroups = {};
       return parsed;
     }

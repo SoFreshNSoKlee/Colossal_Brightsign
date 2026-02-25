@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, ListMusic, Play, Pencil } from 'lucide-react';
+import { Plus, ListMusic, Play, Pencil, Monitor } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -23,8 +23,6 @@ export function RoomDetail() {
   const [newPlaylistOpen, setNewPlaylistOpen] = useState(false);
   const [plName, setPlName] = useState('');
   const [plLoop, setPlLoop] = useState(true);
-  const [selectedAssets, setSelectedAssets] = useState<string[]>([]);
-  const [assetSearch, setAssetSearch] = useState('');
 
   const room = state.rooms.find((r) => r.id === roomId);
   if (!room) {
@@ -50,33 +48,19 @@ export function RoomDetail() {
   const roomStatus = allOffline ? 'offline' : allPlaying ? 'playing' : 'paused';
   const statusVariant = allOffline ? 'error' : allPlaying ? 'success' : 'warning';
 
-  const filteredAssets = state.assets.filter(
-    (a) => !assetSearch || a.title.toLowerCase().includes(assetSearch.toLowerCase()),
-  );
-
-  const toggleAsset = (assetId: string) => {
-    setSelectedAssets((prev) =>
-      prev.includes(assetId) ? prev.filter((id) => id !== assetId) : [...prev, assetId],
-    );
-  };
-
   const openNewPlaylist = () => {
     setPlName('');
     setPlLoop(true);
-    setSelectedAssets([]);
-    setAssetSearch('');
     setNewPlaylistOpen(true);
   };
 
   const createPlaylist = () => {
     if (!plName.trim()) return;
-    const items = selectedAssets.map((assetId, order) => ({ assetId, order }));
     dispatch({
       type: 'CREATE_PLAYLIST',
       name: plName.trim(),
       roomId: room.id,
       loop: plLoop,
-      items,
     });
     setNewPlaylistOpen(false);
   };
@@ -93,6 +77,36 @@ export function RoomDetail() {
             {screenCount} screen{screenCount !== 1 ? 's' : ''}
           </span>
         </NeoCard>
+
+        {/* ── Endpoints ── */}
+        <div>
+          <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-2 px-1">
+            Endpoints ({endpoints.length})
+          </p>
+          <div className="space-y-2">
+            {endpoints.map((ep) => (
+              <NeoCard
+                key={ep.id}
+                padding="sm"
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => navigate(`/endpoint/${ep.id}`)}
+              >
+                <div className="w-9 h-9 rounded-neo-sm flex-shrink-0 bg-neo-accent-light shadow-neo-inner flex items-center justify-center">
+                  <Monitor size={16} className="text-neo-accent" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-neo-text truncate">{ep.name}</div>
+                  <div className="text-xs text-neo-muted mt-0.5">
+                    {ep.aspectRatio} · {ep.status}
+                  </div>
+                </div>
+                <span className="text-[10px] px-2 py-0.5 rounded-neo-pill bg-neo-accent-light text-neo-accent font-semibold flex-shrink-0">
+                  {ep.aspectRatio}
+                </span>
+              </NeoCard>
+            ))}
+          </div>
+        </div>
 
         {/* ── Playlists ── */}
         <div>
@@ -216,7 +230,7 @@ export function RoomDetail() {
         isOpen={newPlaylistOpen}
         onClose={() => setNewPlaylistOpen(false)}
         title="New Playlist"
-        snapHeight="full"
+        snapHeight="auto"
       >
         <div className="space-y-4">
           {/* Name */}
@@ -255,67 +269,9 @@ export function RoomDetail() {
             </button>
           </div>
 
-          {/* Video selection */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest">
-                Select Videos ({selectedAssets.length} selected)
-              </label>
-            </div>
-            <div className="relative mb-2">
-              <input
-                type="text"
-                value={assetSearch}
-                onChange={(e) => setAssetSearch(e.target.value)}
-                placeholder="Search videos…"
-                className="w-full px-4 py-2 rounded-neo-pill neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none"
-              />
-            </div>
-            <div className="space-y-1.5 max-h-52 overflow-y-auto">
-              {filteredAssets.map((asset) => {
-                const isSelected = selectedAssets.includes(asset.id);
-                return (
-                  <button
-                    key={asset.id}
-                    onClick={() => toggleAsset(asset.id)}
-                    className={[
-                      'w-full flex items-center gap-3 p-2.5 rounded-neo-sm transition-all text-left',
-                      isSelected
-                        ? 'neo-surface shadow-neo-inset'
-                        : 'neo-surface shadow-neo-sm hover:shadow-neo',
-                    ].join(' ')}
-                  >
-                    <div
-                      className={[
-                        'w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center border-2 transition-colors',
-                        isSelected
-                          ? 'bg-neo-accent border-neo-accent'
-                          : 'border-neo-dark bg-neo-bg',
-                      ].join(' ')}
-                    >
-                      {isSelected && (
-                        <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                          <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </div>
-                    <div
-                      className="w-10 h-8 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
-                      style={{ backgroundColor: asset.color }}
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold text-neo-text truncate">
-                        {asset.title}
-                      </div>
-                      <div className="text-xs text-neo-muted">
-                        {formatDuration(asset.durationSec)} · {asset.aspect}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <p className="text-xs text-neo-muted">
+            Assets can be added per endpoint after creation from the playlist editor.
+          </p>
 
           {/* Actions */}
           <div className="flex gap-3 pt-1">
