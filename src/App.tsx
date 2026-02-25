@@ -6,6 +6,7 @@ import { RoomDetail } from './pages/RoomDetail';
 import { EndpointDetail } from './pages/EndpointDetail';
 import { Library } from './pages/Library';
 import { PlaylistBuilder } from './pages/PlaylistBuilder';
+import { PlaylistNew } from './pages/PlaylistNew';
 import { Presets } from './pages/Presets';
 import { PresetBuilder } from './pages/PresetBuilder';
 import { Settings } from './pages/Settings';
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/room/:roomId" element={<RoomDetail />} />
             <Route path="/endpoint/:endpointId" element={<EndpointDetail />} />
             <Route path="/library" element={<Library />} />
+            <Route path="/playlists/new" element={<PlaylistNew />} />
             <Route path="/playlists/:playlistId/edit" element={<PlaylistBuilder />} />
             <Route path="/presets" element={<Presets />} />
             <Route path="/presets/new" element={<PresetBuilder />} />

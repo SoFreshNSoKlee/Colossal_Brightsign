@@ -30,7 +30,7 @@ export function BottomNav() {
                 <div
                   className={[
                     'w-10 h-10 rounded-neo-pill flex items-center justify-center transition-all',
-                    isActive ? 'neo-surface shadow-neo-inset' : '',
+                    isActive ? 'neo-surface shadow-neo' : 'hover:neo-surface hover:shadow-neo-inset',
                   ].join(' ')}
                 >
                   <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
