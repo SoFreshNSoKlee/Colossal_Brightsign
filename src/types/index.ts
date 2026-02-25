@@ -49,6 +49,7 @@ export interface Asset {
   aspect: string; // Derived from the assigned endpoint's aspectRatio
   updatedAt: string;
   color: string;
+  imageUrl?: string;
 }
 
 export interface PlaylistItem {

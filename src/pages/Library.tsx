@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ListMusic, Film, Plus, Pencil, Trash2, ChevronDown, Upload, Monitor } from 'lucide-react';
+import { Search, ListMusic, Film, Plus, Pencil, Trash2, ChevronDown, Upload, Monitor, ChevronsDown, ChevronsUp } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -141,13 +141,27 @@ export function Library() {
           ))}
         </div>
 
-        {/* ── Search + New (playlists only) ── */}
+        {/* ── Search + collapse/expand all + New ── */}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1">
             <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-neo-muted pointer-events-none" />
             <input type="text" placeholder={`Search ${tab}…`} value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-neo-pill neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none" />
           </div>
+          <button
+            onClick={() => setExpandedRooms(new Set(state.rooms.map((r) => r.id)))}
+            className="w-9 h-9 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors flex-shrink-0"
+            title="Expand all"
+          >
+            <ChevronsDown size={15} />
+          </button>
+          <button
+            onClick={() => setExpandedRooms(new Set())}
+            className="w-9 h-9 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors flex-shrink-0"
+            title="Collapse all"
+          >
+            <ChevronsUp size={15} />
+          </button>
           {tab === 'playlists' && (
             <NeoButton variant="primary" size="sm" onClick={() => navigate('/playlists/new')} icon={<Plus size={14} />}>New</NeoButton>
           )}
@@ -210,9 +224,16 @@ export function Library() {
                                 {epAssets.map((asset) => (
                                   <NeoCard key={asset.id} padding="sm" className="flex items-center gap-3">
                                     {/* Thumbnail */}
-                                    <div className="w-12 h-9 rounded-neo-sm flex-shrink-0 shadow-neo-inner flex items-center justify-center relative overflow-hidden"
+                                    <div className="w-12 h-9 rounded-neo-sm flex-shrink-0 overflow-hidden"
                                       style={{ backgroundColor: asset.color }}>
-                                      <span className="text-white/50 font-bold text-[9px]">{asset.aspect}</span>
+                                      {asset.imageUrl && (
+                                        <img
+                                          src={asset.imageUrl}
+                                          alt={asset.title}
+                                          className="w-full h-full object-cover"
+                                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                        />
+                                      )}
                                     </div>
 
                                     {/* Info */}
