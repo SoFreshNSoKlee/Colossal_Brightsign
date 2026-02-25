@@ -40,10 +40,10 @@ export function Sidebar() {
             end={to === '/'}
             className={({ isActive }) =>
               [
-                'flex items-center gap-3 px-4 py-3 rounded-neo-sm text-sm font-semibold transition-all',
+                'flex items-center gap-3 px-4 py-3 rounded-neo-sm text-sm font-semibold transition-all border-l-2',
                 isActive
-                  ? 'neo-surface shadow-neo-inset text-neo-accent'
-                  : 'text-neo-muted hover:text-neo-text hover:neo-surface hover:shadow-neo-sm',
+                  ? 'neo-surface shadow-neo text-neo-accent border-neo-accent'
+                  : 'text-neo-muted border-transparent hover:text-neo-text hover:neo-surface hover:shadow-neo-inset',
               ].join(' ')
             }
           >

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, CheckCircle, Calendar } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle, Calendar, Timer } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -38,6 +38,8 @@ export function Presets() {
   const [scheduleStartTime, setScheduleStartTime] = useState(nowTimeString());
   const [scheduleEndTime, setScheduleEndTime] = useState(oneHourLaterTimeString());
   const [appliedId, setAppliedId] = useState<string | null>(null);
+  // presetId -> scheduled end Date (used to display timer icon)
+  const [scheduledEndTimes, setScheduledEndTimes] = useState<Record<string, Date>>({});
 
   const openScheduler = (preset: Preset) => {
     setSchedulerPreset(preset);
@@ -50,6 +52,13 @@ export function Presets() {
     if (!schedulerPreset) return;
     dispatch({ type: 'APPLY_PRESET', presetId: schedulerPreset.id });
     setAppliedId(schedulerPreset.id);
+
+    // Store scheduled end time so we can show the timer icon
+    if (scheduleDate && scheduleEndTime) {
+      const endDate = new Date(`${scheduleDate}T${scheduleEndTime}`);
+      setScheduledEndTimes((prev) => ({ ...prev, [schedulerPreset.id]: endDate }));
+    }
+
     setSchedulerPreset(null);
     setTimeout(() => setAppliedId(null), 3000);
   };
@@ -86,7 +95,14 @@ export function Presets() {
         </div>
 
         <div className="space-y-3">
-          {state.presets.map((preset) => (
+          {state.presets.map((preset) => {
+            const scheduledEnd = scheduledEndTimes[preset.id];
+            const hasActiveTimer = scheduledEnd && scheduledEnd > new Date();
+            const timerLabel = hasActiveTimer
+              ? `Ends ${scheduledEnd.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+              : null;
+
+            return (
             <NeoCard key={preset.id}>
               <div className="flex items-start gap-4">
                 {/* Icon + info */}
@@ -95,7 +111,15 @@ export function Presets() {
                     {PRESET_ICONS[preset.id] ?? '⚙️'}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="font-bold text-neo-text">{preset.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-neo-text">{preset.name}</h3>
+                      {hasActiveTimer && (
+                        <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-neo-pill bg-amber-100 text-amber-700 font-semibold flex-shrink-0">
+                          <Timer size={10} />
+                          {timerLabel}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-neo-muted mt-1 leading-relaxed">
                       {preset.description}
                     </p>
@@ -132,7 +156,8 @@ export function Presets() {
                 </div>
               </div>
             </NeoCard>
-          ))}
+          );
+          })}
 
           {state.presets.length === 0 && (
             <NeoCard className="py-12 text-center">

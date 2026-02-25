@@ -9,7 +9,7 @@ import { useApp } from '../context/AppContext';
 import { ALL_TAGS } from '../mock/data';
 import type { Asset } from '../types';
 
-type LibTab = 'assets' | 'playlists';
+type LibTab = 'playlists' | 'assets';
 
 const THUMBNAIL_COLORS = [
   '#8B6914', '#A0522D', '#5B8FA8', '#3A7CA5', '#6B7C4E',
@@ -73,7 +73,7 @@ function defaultAssetForm(asset?: Asset): AssetFormState {
 export function Library() {
   const { state, dispatch } = useApp();
   const navigate = useNavigate();
-  const [tab, setTab] = useState<LibTab>('assets');
+  const [tab, setTab] = useState<LibTab>('playlists');
   const [search, setSearch] = useState('');
   const [activeTags, setActiveTags] = useState<string[]>([]);
 
@@ -176,7 +176,7 @@ export function Library() {
 
         {/* ── Tabs ── */}
         <div className="flex gap-2 neo-surface shadow-neo-inset rounded-neo-pill p-1">
-          {(['assets', 'playlists'] as LibTab[]).map((t) => (
+          {(['playlists', 'assets'] as LibTab[]).map((t) => (
             <button key={t} onClick={() => setTab(t)}
               className={['flex-1 flex items-center justify-center gap-2 py-2 rounded-neo-pill text-sm font-semibold transition-all capitalize',
                 tab === t ? 'neo-surface shadow-neo text-neo-accent' : 'text-neo-muted hover:text-neo-text'].join(' ')}>
@@ -193,7 +193,7 @@ export function Library() {
             <input type="text" placeholder={`Search ${tab}…`} value={search} onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-10 pr-4 py-3 rounded-neo-pill neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none" />
           </div>
-          <NeoButton variant="primary" size="sm" onClick={tab === 'assets' ? openCreateAsset : openCreatePlaylist} icon={<Plus size={14} />}>New</NeoButton>
+          <NeoButton variant="primary" size="sm" onClick={tab === 'assets' ? openCreateAsset : () => navigate('/playlists/new')} icon={<Plus size={14} />}>New</NeoButton>
         </div>
 
         {/* ── Tag filters ── */}
