@@ -1,0 +1,260 @@
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import {
+  ChevronUp,
+  ChevronDown,
+  Trash2,
+  Plus,
+  Search,
+  GripVertical,
+} from 'lucide-react';
+import { Layout } from '../components/layout/Layout';
+import { NeoCard } from '../components/design-system/NeoCard';
+import { NeoButton } from '../components/design-system/NeoButton';
+import { BottomSheetModal } from '../components/design-system/BottomSheetModal';
+import { useApp } from '../context/AppContext';
+
+function formatDuration(sec: number): string {
+  if (sec >= 3600) return `${Math.floor(sec / 3600)}h ${Math.floor((sec % 3600) / 60)}m`;
+  if (sec >= 60) return `${Math.floor(sec / 60)}m`;
+  return `${sec}s`;
+}
+
+export function PlaylistBuilder() {
+  const { playlistId } = useParams<{ playlistId: string }>();
+  const { state, dispatch } = useApp();
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [saved, setSaved] = useState(false);
+
+  const playlist = state.playlists.find((p) => p.id === playlistId);
+  if (!playlist) {
+    return (
+      <Layout>
+        <div className="p-6 text-neo-muted">Playlist not found.</div>
+      </Layout>
+    );
+  }
+
+  const sortedItems = [...playlist.items].sort((a, b) => a.order - b.order);
+
+  const existingIds = new Set(playlist.items.map((i) => i.assetId));
+  const availableAssets = state.assets.filter(
+    (a) =>
+      !existingIds.has(a.id) &&
+      (!search || a.title.toLowerCase().includes(search.toLowerCase())),
+  );
+
+  const totalRuntime = sortedItems.reduce((sum, item) => {
+    const a = state.assets.find((a) => a.id === item.assetId);
+    return sum + (a?.durationSec ?? 0);
+  }, 0);
+
+  const handleSave = () => {
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <Layout title={`Edit: ${playlist.name}`}>
+      <div className="space-y-4 px-2 pt-2">
+        {/* ── Playlist header ── */}
+        <NeoCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-neo-text">{playlist.name}</h2>
+              <p className="text-xs text-neo-muted mt-0.5">
+                {sortedItems.length} tracks · {formatDuration(totalRuntime)}
+                {playlist.loop ? ' · Loops' : ' · Plays once'}
+              </p>
+            </div>
+            <NeoButton
+              variant={saved ? 'success' : 'primary'}
+              size="sm"
+              onClick={handleSave}
+            >
+              {saved ? '✓ Saved' : 'Save'}
+            </NeoButton>
+          </div>
+        </NeoCard>
+
+        {/* ── Track list ── */}
+        <div>
+          <div className="flex items-center justify-between mb-3 px-1">
+            <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest">
+              Tracks
+            </p>
+            <NeoButton
+              size="sm"
+              variant="primary"
+              onClick={() => setAddOpen(true)}
+              icon={<Plus size={14} />}
+            >
+              Add
+            </NeoButton>
+          </div>
+
+          {sortedItems.length === 0 ? (
+            <NeoCard className="py-10 text-center">
+              <p className="text-neo-muted">No tracks yet.</p>
+              <p className="text-xs text-neo-muted mt-1">Tap "Add" to get started.</p>
+            </NeoCard>
+          ) : (
+            <div className="space-y-2">
+              {sortedItems.map((item, idx) => {
+                const asset = state.assets.find((a) => a.id === item.assetId);
+                if (!asset) return null;
+
+                return (
+                  <NeoCard key={item.assetId} className="flex items-center gap-3" padding="sm">
+                    {/* Drag handle (visual only) */}
+                    <GripVertical size={16} className="text-neo-dark flex-shrink-0" />
+
+                    {/* Order number */}
+                    <div className="w-6 text-xs font-bold text-neo-muted text-center flex-shrink-0">
+                      {idx + 1}
+                    </div>
+
+                    {/* Thumbnail */}
+                    <div
+                      className="w-10 h-8 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
+                      style={{ backgroundColor: asset.color }}
+                    />
+
+                    {/* Asset info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-semibold text-neo-text truncate">
+                        {asset.title}
+                      </div>
+                      <div className="text-xs text-neo-muted">
+                        {formatDuration(asset.durationSec)}
+                      </div>
+                    </div>
+
+                    {/* Reorder buttons */}
+                    <div className="flex flex-col gap-0.5 flex-shrink-0">
+                      <button
+                        disabled={idx === 0}
+                        onClick={() =>
+                          dispatch({
+                            type: 'REORDER_PLAYLIST',
+                            playlistId: playlist.id,
+                            fromIdx: idx,
+                            toIdx: idx - 1,
+                          })
+                        }
+                        className="w-7 h-7 rounded-lg neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-text disabled:opacity-30 transition-colors"
+                      >
+                        <ChevronUp size={14} />
+                      </button>
+                      <button
+                        disabled={idx === sortedItems.length - 1}
+                        onClick={() =>
+                          dispatch({
+                            type: 'REORDER_PLAYLIST',
+                            playlistId: playlist.id,
+                            fromIdx: idx,
+                            toIdx: idx + 1,
+                          })
+                        }
+                        className="w-7 h-7 rounded-lg neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-text disabled:opacity-30 transition-colors"
+                      >
+                        <ChevronDown size={14} />
+                      </button>
+                    </div>
+
+                    {/* Remove */}
+                    <button
+                      onClick={() =>
+                        dispatch({
+                          type: 'REMOVE_PLAYLIST_ITEM',
+                          playlistId: playlist.id,
+                          assetId: item.assetId,
+                        })
+                      }
+                      className="w-8 h-8 rounded-neo-pill flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors flex-shrink-0"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  </NeoCard>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Add Asset Modal ── */}
+      <BottomSheetModal
+        isOpen={addOpen}
+        onClose={() => {
+          setAddOpen(false);
+          setSearch('');
+        }}
+        title="Add Asset"
+        snapHeight="full"
+      >
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-neo-muted" />
+          <input
+            type="text"
+            placeholder="Search assets…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-9 pr-4 py-2.5 rounded-neo-pill neo-surface shadow-neo-inner text-sm text-neo-text placeholder:text-neo-muted focus:outline-none"
+          />
+        </div>
+
+        {availableAssets.length === 0 && (
+          <p className="text-center text-neo-muted py-8">
+            {existingIds.size === state.assets.length
+              ? 'All assets already in playlist.'
+              : 'No assets match your search.'}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {availableAssets.map((asset) => (
+            <div
+              key={asset.id}
+              className="flex items-center gap-3 p-3 rounded-neo-sm neo-surface shadow-neo-sm cursor-pointer hover:shadow-neo active:shadow-neo-pressed transition-shadow"
+              onClick={() => {
+                dispatch({
+                  type: 'ADD_PLAYLIST_ITEM',
+                  playlistId: playlist.id,
+                  assetId: asset.id,
+                });
+                setAddOpen(false);
+                setSearch('');
+              }}
+            >
+              <div
+                className="w-12 h-9 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
+                style={{ backgroundColor: asset.color }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-neo-text">{asset.title}</div>
+                <div className="text-xs text-neo-muted">
+                  {formatDuration(asset.durationSec)} · {asset.aspect}
+                </div>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {asset.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[10px] px-1.5 py-0.5 rounded-neo-pill bg-neo-accent-light text-neo-accent font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <Plus size={16} className="text-neo-accent flex-shrink-0" />
+            </div>
+          ))}
+        </div>
+      </BottomSheetModal>
+    </Layout>
+  );
+}

@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-neo-bg text-neo-text;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer utilities {
+  .neo-surface {
+    background: linear-gradient(145deg, #f2efe9 0%, #dedad4 100%);
+  }
+
+  .neo-bg {
+    background: linear-gradient(160deg, #e2ded8 0%, #d4d0ca 100%);
+  }
+
+  /* Safe area inset for bottom nav on iOS */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
