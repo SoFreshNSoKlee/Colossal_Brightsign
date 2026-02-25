@@ -24,7 +24,7 @@ const initialState: AppState = {
   presets: mockPresets,
   uiState: {
     activeFilters: [],
-    theme: 'light',
+    theme: 'dark',
     syncGroups: {},
   },
 };

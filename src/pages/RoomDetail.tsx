@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Plus, ListMusic, Play, Pencil, Monitor } from 'lucide-react';
+import { Plus, ListMusic, Play, Pencil, Monitor, ChevronDown, ChevronUp } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -26,6 +26,15 @@ export function RoomDetail() {
   const [newPlaylistOpen, setNewPlaylistOpen] = useState(false);
   const [plName, setPlName] = useState('');
   const [plLoop, setPlLoop] = useState(true);
+  const [expandedPlaylists, setExpandedPlaylists] = useState<Set<string>>(new Set());
+
+  const togglePlaylistExpand = (playlistId: string) => {
+    setExpandedPlaylists((prev) => {
+      const next = new Set(prev);
+      if (next.has(playlistId)) next.delete(playlistId); else next.add(playlistId);
+      return next;
+    });
+  };
 
   const room = state.rooms.find((r) => r.id === roomId);
   if (!room) {
@@ -129,83 +138,124 @@ export function RoomDetail() {
                   }, 0);
                   const isActive = pl.id === activePlaylistId;
 
+                  const isExpanded = expandedPlaylists.has(pl.id);
+                  const plAssets = pl.items
+                    .filter((item, _, arr) =>
+                      arr.findIndex((i) => i.assetId === item.assetId) === arr.indexOf(item),
+                    )
+                    .map((item) => state.assets.find((a) => a.id === item.assetId))
+                    .filter(Boolean);
+
                   return (
                     <NeoCard
                       key={pl.id}
                       className={[
-                        'flex items-center gap-3',
                         isActive ? 'ring-2 ring-neo-accent/40' : '',
                       ].join(' ')}
                       padding="sm"
                     >
-                      {/* Icon */}
-                      <div
-                        className={[
-                          'w-10 h-10 rounded-neo-sm flex-shrink-0 shadow-neo-inner flex items-center justify-center',
-                          isActive ? 'bg-neo-accent' : 'bg-neo-accent-light',
-                        ].join(' ')}
-                      >
-                        <ListMusic
-                          size={18}
-                          className={isActive ? 'text-white' : 'text-neo-accent'}
-                        />
+                      <div className="flex items-center gap-3">
+                        {/* Icon */}
+                        <div
+                          className={[
+                            'w-10 h-10 rounded-neo-sm flex-shrink-0 shadow-neo-inner flex items-center justify-center',
+                            isActive ? 'bg-neo-accent' : 'bg-neo-accent-light',
+                          ].join(' ')}
+                        >
+                          <ListMusic
+                            size={18}
+                            className={isActive ? 'text-white' : 'text-neo-accent'}
+                          />
+                        </div>
+
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm font-semibold text-neo-text truncate">
+                              {pl.name}
+                            </span>
+                            {isActive && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-neo-pill bg-neo-accent text-white font-semibold flex-shrink-0">
+                                Now Playing
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-neo-muted mt-0.5">
+                            {pl.items.length} tracks · {formatDuration(runtime)}
+                            <span
+                              className={[
+                                'ml-1.5 text-[10px] px-1.5 py-0.5 rounded-neo-pill font-semibold',
+                                pl.loop
+                                  ? 'bg-green-100 text-green-700'
+                                  : 'bg-amber-100 text-amber-700',
+                              ].join(' ')}
+                            >
+                              {pl.loop ? 'Loop' : 'Once'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <button
+                            onClick={() => togglePlaylistExpand(pl.id)}
+                            className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
+                            title={isExpanded ? 'Collapse playlist' : 'Expand playlist'}
+                          >
+                            {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                          </button>
+                          <button
+                            onClick={() =>
+                              dispatch({
+                                type: 'SET_ROOM_PLAYLIST',
+                                roomId: room.id,
+                                playlistId: pl.id,
+                              })
+                            }
+                            className={[
+                              'w-8 h-8 rounded-neo-pill flex items-center justify-center transition-colors',
+                              isActive
+                                ? 'bg-neo-accent text-white shadow-neo-sm'
+                                : 'neo-surface shadow-neo-sm text-neo-muted hover:text-neo-accent',
+                            ].join(' ')}
+                            title={`Play on all ${screenCount} screen${screenCount !== 1 ? 's' : ''}`}
+                          >
+                            <Play size={13} />
+                          </button>
+                          <button
+                            onClick={() => navigate(`/playlists/${pl.id}/edit`)}
+                            className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
+                            title="Edit playlist"
+                          >
+                            <Pencil size={13} />
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-semibold text-neo-text truncate">
-                            {pl.name}
-                          </span>
-                          {isActive && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-neo-pill bg-neo-accent text-white font-semibold flex-shrink-0">
-                              Now Playing
-                            </span>
+                      {/* Expanded asset list */}
+                      {isExpanded && (
+                        <div className="mt-3 pt-3 border-t border-neo-dark/10 space-y-1.5">
+                          {plAssets.length === 0 ? (
+                            <p className="text-xs text-neo-muted text-center py-2">No assets in this playlist.</p>
+                          ) : (
+                            plAssets.map((asset) => asset && (
+                              <div
+                                key={asset.id}
+                                className="flex items-center gap-2.5 px-1"
+                              >
+                                <div
+                                  className="w-7 h-7 rounded-neo-sm flex-shrink-0 shadow-neo-inner"
+                                  style={{ backgroundColor: asset.color }}
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-semibold text-neo-text truncate">{asset.title}</div>
+                                  <div className="text-[10px] text-neo-muted">{formatDuration(asset.durationSec)}</div>
+                                </div>
+                              </div>
+                            ))
                           )}
                         </div>
-                        <div className="text-xs text-neo-muted mt-0.5">
-                          {pl.items.length} tracks · {formatDuration(runtime)}
-                          <span
-                            className={[
-                              'ml-1.5 text-[10px] px-1.5 py-0.5 rounded-neo-pill font-semibold',
-                              pl.loop
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-amber-100 text-amber-700',
-                            ].join(' ')}
-                          >
-                            {pl.loop ? 'Loop' : 'Once'}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-1.5 flex-shrink-0">
-                        <button
-                          onClick={() =>
-                            dispatch({
-                              type: 'SET_ROOM_PLAYLIST',
-                              roomId: room.id,
-                              playlistId: pl.id,
-                            })
-                          }
-                          className={[
-                            'w-8 h-8 rounded-neo-pill flex items-center justify-center transition-colors',
-                            isActive
-                              ? 'bg-neo-accent text-white shadow-neo-sm'
-                              : 'neo-surface shadow-neo-sm text-neo-muted hover:text-neo-accent',
-                          ].join(' ')}
-                          title={`Play on all ${screenCount} screen${screenCount !== 1 ? 's' : ''}`}
-                        >
-                          <Play size={13} />
-                        </button>
-                        <button
-                          onClick={() => navigate(`/playlists/${pl.id}/edit`)}
-                          className="w-8 h-8 rounded-neo-pill neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
-                          title="Edit playlist"
-                        >
-                          <Pencil size={13} />
-                        </button>
-                      </div>
+                      )}
                     </NeoCard>
                   );
                 })}

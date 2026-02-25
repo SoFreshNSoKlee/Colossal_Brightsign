@@ -24,23 +24,26 @@ function nowTimeString() {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+function oneHourLaterTimeString() {
+  const d = new Date(Date.now() + 60 * 60 * 1000);
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export function Presets() {
   const { state, dispatch } = useApp();
   const navigate = useNavigate();
 
   const [schedulerPreset, setSchedulerPreset] = useState<Preset | null>(null);
-  const [scheduleNow, setScheduleNow] = useState(true);
   const [scheduleDate, setScheduleDate] = useState(todayDateString());
   const [scheduleStartTime, setScheduleStartTime] = useState(nowTimeString());
-  const [scheduleEndTime, setScheduleEndTime] = useState('');
+  const [scheduleEndTime, setScheduleEndTime] = useState(oneHourLaterTimeString());
   const [appliedId, setAppliedId] = useState<string | null>(null);
 
   const openScheduler = (preset: Preset) => {
     setSchedulerPreset(preset);
-    setScheduleNow(true);
     setScheduleDate(todayDateString());
     setScheduleStartTime(nowTimeString());
-    setScheduleEndTime('');
+    setScheduleEndTime(oneHourLaterTimeString());
   };
 
   const handleConfirm = () => {
@@ -150,78 +153,47 @@ export function Presets() {
       >
         {schedulerPreset && (
           <div className="space-y-5">
-            {/* When section */}
+            {/* Scheduled time section */}
             <div>
               <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-3">
-                When
+                Schedule
               </p>
 
-              {/* Now checkbox */}
-              <button
-                onClick={() => setScheduleNow((v) => !v)}
-                className={[
-                  'w-full flex items-center gap-3 p-3 rounded-neo-sm transition-all',
-                  scheduleNow ? 'neo-surface shadow-neo-inset' : 'neo-surface shadow-neo-sm',
-                ].join(' ')}
-              >
-                <div
-                  className={[
-                    'w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center border-2 transition-colors',
-                    scheduleNow
-                      ? 'bg-neo-accent border-neo-accent'
-                      : 'border-neo-dark bg-neo-bg',
-                  ].join(' ')}
-                >
-                  {scheduleNow && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
+              <div className="space-y-3 p-3 rounded-neo-sm neo-surface shadow-neo-inner">
+                <div className="flex items-center gap-2 text-xs font-semibold text-neo-muted mb-1">
+                  <Calendar size={13} />
+                  Scheduled time
                 </div>
-                <div className="text-left">
-                  <div className="text-sm font-semibold text-neo-text">Apply Now</div>
-                  <div className="text-xs text-neo-muted">Take effect immediately</div>
+                <div>
+                  <label className="text-[10px] text-neo-muted block mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={scheduleDate}
+                    onChange={(e) => setScheduleDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
+                  />
                 </div>
-              </button>
-
-              {/* Date/time picker (when not now) */}
-              {!scheduleNow && (
-                <div className="mt-3 space-y-3 p-3 rounded-neo-sm neo-surface shadow-neo-inner">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-neo-muted mb-1">
-                    <Calendar size={13} />
-                    Scheduled time
-                  </div>
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-neo-muted block mb-1">Date</label>
+                    <label className="text-[10px] text-neo-muted block mb-1">Start time</label>
                     <input
-                      type="date"
-                      value={scheduleDate}
-                      onChange={(e) => setScheduleDate(e.target.value)}
+                      type="time"
+                      value={scheduleStartTime}
+                      onChange={(e) => setScheduleStartTime(e.target.value)}
                       className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[10px] text-neo-muted block mb-1">Start time</label>
-                      <input
-                        type="time"
-                        value={scheduleStartTime}
-                        onChange={(e) => setScheduleStartTime(e.target.value)}
-                        className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-neo-muted block mb-1">End time (optional)</label>
-                      <input
-                        type="time"
-                        value={scheduleEndTime}
-                        onChange={(e) => setScheduleEndTime(e.target.value)}
-                        className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="text-[10px] text-neo-muted block mb-1">End time</label>
+                    <input
+                      type="time"
+                      value={scheduleEndTime}
+                      onChange={(e) => setScheduleEndTime(e.target.value)}
+                      className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
+                    />
                   </div>
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Changes summary */}
@@ -280,7 +252,7 @@ export function Presets() {
                 Cancel
               </NeoButton>
               <NeoButton variant="primary" fullWidth onClick={handleConfirm}>
-                {scheduleNow ? 'Apply Now' : 'Schedule'}
+                Confirm
               </NeoButton>
             </div>
           </div>
