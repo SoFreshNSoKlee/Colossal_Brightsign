@@ -17,7 +17,7 @@ const ROOM_ICONS: Record<string, string> = {
   'automation-suite': '🤖',
   'megalodon-room': '🦈',
   'social-den': '🛋️',
-  'tour-path': '🚶',
+  'tour-path': '🎥',
 };
 
 function RoomCard({ room }: { room: Room }) {
