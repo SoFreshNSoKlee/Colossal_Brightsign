@@ -5,7 +5,7 @@ import React, {
   useEffect,
   type Dispatch,
 } from 'react';
-import type { AppState, AppAction, AuditLogEntry, Endpoint, NowPlaying } from '../types';
+import type { AppState, AppAction, Endpoint, NowPlaying, Asset } from '../types';
 import {
   mockAssets,
   mockEndpoints,
@@ -23,32 +23,14 @@ const initialState: AppState = {
   assets: mockAssets,
   playlists: mockPlaylists,
   presets: mockPresets,
-  auditLog: [],
   uiState: {
     activeFilters: [],
     theme: 'light',
-    userRole: 'admin',
     syncGroups: {},
   },
 };
 
 // ─── HELPERS ───────────────────────────────────────────────────────────────────
-
-function makeLog(
-  state: AppState,
-  action: string,
-  targets: string[],
-  details = '',
-): AuditLogEntry {
-  return {
-    id: `log-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    timestamp: new Date().toISOString(),
-    userRole: state.uiState.userRole,
-    action,
-    targets,
-    details,
-  };
-}
 
 function ambientNowPlaying(): NowPlaying {
   return {
@@ -69,6 +51,10 @@ function updateEndpoints(
   );
 }
 
+function makeId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
 // ─── REDUCER ───────────────────────────────────────────────────────────────────
 
 function reducer(state: AppState, action: AppAction): AppState {
@@ -76,55 +62,41 @@ function reducer(state: AppState, action: AppAction): AppState {
     // ── Playback controls ────────────────────────────────────────────────────
 
     case 'PLAY_ENDPOINT': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      if (!ep) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
           status: 'playing',
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Play', [ep.name])],
       };
     }
 
     case 'PAUSE_ENDPOINT': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      if (!ep) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
           status: 'paused',
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Pause', [ep.name])],
       };
     }
 
     case 'RESTART_ENDPOINT': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      if (!ep) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], (e) => ({
           status: 'playing',
           nowPlaying: { ...e.nowPlaying, positionSec: 0, currentItemIndex: 0 },
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Restart', [ep.name])],
       };
     }
 
     case 'TOGGLE_LOOP': {
       const ep = state.endpoints.find((e) => e.id === action.endpointId);
       if (!ep) return state;
-      const newLoop = !ep.loop;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
-          loop: newLoop,
+          loop: !ep.loop,
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, newLoop ? 'Loop On' : 'Loop Off', [ep.name]),
-        ],
       };
     }
 
@@ -146,7 +118,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             positionSec: 0,
           },
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Skip Next', [ep.name])],
       };
     }
 
@@ -169,16 +140,12 @@ function reducer(state: AppState, action: AppAction): AppState {
             positionSec: 0,
           },
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Skip Prev', [ep.name])],
       };
     }
 
     // ── Asset / Playlist swaps ────────────────────────────────────────────────
 
     case 'SWAP_ASSET': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      const asset = state.assets.find((a) => a.id === action.assetId);
-      if (!ep || !asset) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
@@ -190,17 +157,10 @@ function reducer(state: AppState, action: AppAction): AppState {
             currentItemIndex: 0,
           },
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Swap Asset', [ep.name], `→ ${asset.title}`),
-        ],
       };
     }
 
     case 'CHOOSE_PLAYLIST': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      const pl = state.playlists.find((p) => p.id === action.playlistId);
-      if (!ep || !pl) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
@@ -212,10 +172,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             currentItemIndex: 0,
           },
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Choose Playlist', [ep.name], `→ ${pl.name}`),
-        ],
       };
     }
 
@@ -232,14 +188,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             [action.groupId]: !current,
           },
         },
-        auditLog: [
-          ...state.auditLog,
-          makeLog(
-            state,
-            !current ? 'Sync On' : 'Sync Off',
-            [action.groupId],
-          ),
-        ],
       };
     }
 
@@ -249,7 +197,6 @@ function reducer(state: AppState, action: AppAction): AppState {
       const preset = state.presets.find((p) => p.id === action.presetId);
       if (!preset) return state;
 
-      const changeIds = preset.changes.map((c) => c.endpointId);
       let endpoints = [...state.endpoints];
 
       preset.changes.forEach((change) => {
@@ -265,19 +212,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         }));
       });
 
-      const targetNames = changeIds
-        .map((id) => state.endpoints.find((e) => e.id === id)?.name ?? id)
-        .slice(0, 4)
-        .join(', ');
-
-      return {
-        ...state,
-        endpoints,
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, `Apply Preset: ${preset.name}`, [targetNames]),
-        ],
-      };
+      return { ...state, endpoints };
     }
 
     // ── Set Ambient ────────────────────────────────────────────────────────────
@@ -291,16 +226,12 @@ function reducer(state: AppState, action: AppAction): AppState {
           .filter((ep) => ep.roomId === action.roomId)
           .map((ep) => ep.id);
       }
-      const names = ids
-        .map((id) => state.endpoints.find((e) => e.id === id)?.name ?? id)
-        .join(', ');
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, ids, () => ({
           status: 'playing',
           nowPlaying: ambientNowPlaying(),
         })),
-        auditLog: [...state.auditLog, makeLog(state, 'Set Ambient', [names])],
       };
     }
 
@@ -315,27 +246,18 @@ function reducer(state: AppState, action: AppAction): AppState {
           .filter((ep) => ep.roomId === action.roomId)
           .map((ep) => ep.id);
       }
-      const names = ids
-        .map((id) => state.endpoints.find((e) => e.id === id)?.name ?? id)
-        .join(', ');
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, ids, () => ({
           status: 'playing',
           nowPlaying: ambientNowPlaying(),
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Return to Default', [names]),
-        ],
       };
     }
 
     // ── Run Investor Once (Megalodon special) ──────────────────────────────────
 
     case 'RUN_INVESTOR_ONCE': {
-      const ep = state.endpoints.find((e) => e.id === action.endpointId);
-      if (!ep) return state;
       return {
         ...state,
         endpoints: updateEndpoints(state.endpoints, [action.endpointId], () => ({
@@ -348,10 +270,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             currentItemIndex: 0,
           },
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Run Investor Once', [ep.name]),
-        ],
       };
     }
 
@@ -365,18 +283,10 @@ function reducer(state: AppState, action: AppAction): AppState {
         items.splice(action.toIdx, 0, moved);
         return { ...pl, items: items.map((it, i) => ({ ...it, order: i })) };
       });
-      return {
-        ...state,
-        playlists,
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Reorder Playlist', [action.playlistId]),
-        ],
-      };
+      return { ...state, playlists };
     }
 
     case 'ADD_PLAYLIST_ITEM': {
-      const asset = state.assets.find((a) => a.id === action.assetId);
       const playlists = state.playlists.map((pl) => {
         if (pl.id !== action.playlistId) return pl;
         const already = pl.items.some((i) => i.assetId === action.assetId);
@@ -386,19 +296,7 @@ function reducer(state: AppState, action: AppAction): AppState {
           items: [...pl.items, { assetId: action.assetId, order: pl.items.length }],
         };
       });
-      return {
-        ...state,
-        playlists,
-        auditLog: [
-          ...state.auditLog,
-          makeLog(
-            state,
-            'Add to Playlist',
-            [action.playlistId],
-            asset?.title ?? action.assetId,
-          ),
-        ],
-      };
+      return { ...state, playlists };
     }
 
     case 'REMOVE_PLAYLIST_ITEM': {
@@ -409,14 +307,7 @@ function reducer(state: AppState, action: AppAction): AppState {
           .map((it, i) => ({ ...it, order: i }));
         return { ...pl, items };
       });
-      return {
-        ...state,
-        playlists,
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, 'Remove from Playlist', [action.playlistId]),
-        ],
-      };
+      return { ...state, playlists };
     }
 
     // ── Tour Path Theme ────────────────────────────────────────────────────────
@@ -438,10 +329,6 @@ function reducer(state: AppState, action: AppAction): AppState {
             currentItemIndex: 0,
           },
         })),
-        auditLog: [
-          ...state.auditLog,
-          makeLog(state, `Tour Theme: ${action.theme}`, ['Tour Path']),
-        ],
       };
     }
 
@@ -458,12 +345,6 @@ function reducer(state: AppState, action: AppAction): AppState {
 
     // ── UI state ───────────────────────────────────────────────────────────────
 
-    case 'SET_USER_ROLE':
-      return {
-        ...state,
-        uiState: { ...state.uiState, userRole: action.role },
-      };
-
     case 'TOGGLE_THEME':
       return {
         ...state,
@@ -479,6 +360,89 @@ function reducer(state: AppState, action: AppAction): AppState {
         uiState: { ...state.uiState, activeFilters: action.filters },
       };
 
+    // ── Asset CRUD ─────────────────────────────────────────────────────────────
+
+    case 'CREATE_ASSET': {
+      const newAsset: Asset = {
+        ...action.asset,
+        id: action.asset.id ?? makeId('asset'),
+        updatedAt: action.asset.updatedAt ?? new Date().toISOString(),
+      };
+      return { ...state, assets: [...state.assets, newAsset] };
+    }
+
+    case 'UPDATE_ASSET': {
+      const assets = state.assets.map((a) =>
+        a.id === action.assetId
+          ? { ...a, ...action.updates, updatedAt: new Date().toISOString() }
+          : a,
+      );
+      return { ...state, assets };
+    }
+
+    case 'DELETE_ASSET': {
+      return {
+        ...state,
+        assets: state.assets.filter((a) => a.id !== action.assetId),
+        // Remove from all playlists
+        playlists: state.playlists.map((pl) => ({
+          ...pl,
+          items: pl.items
+            .filter((i) => i.assetId !== action.assetId)
+            .map((it, idx) => ({ ...it, order: idx })),
+        })),
+      };
+    }
+
+    // ── Playlist CRUD ──────────────────────────────────────────────────────────
+
+    case 'CREATE_PLAYLIST': {
+      const newPlaylist = {
+        id: makeId('playlist'),
+        name: action.name,
+        loop: action.loop,
+        items: action.items ?? [],
+      };
+      return { ...state, playlists: [...state.playlists, newPlaylist] };
+    }
+
+    case 'UPDATE_PLAYLIST_META': {
+      const playlists = state.playlists.map((pl) =>
+        pl.id === action.playlistId
+          ? { ...pl, name: action.name, loop: action.loop }
+          : pl,
+      );
+      return { ...state, playlists };
+    }
+
+    case 'DELETE_PLAYLIST': {
+      return {
+        ...state,
+        playlists: state.playlists.filter((pl) => pl.id !== action.playlistId),
+      };
+    }
+
+    // ── Preset CRUD ────────────────────────────────────────────────────────────
+
+    case 'CREATE_PRESET': {
+      const newPreset = { ...action.preset, id: makeId('preset') };
+      return { ...state, presets: [...state.presets, newPreset] };
+    }
+
+    case 'UPDATE_PRESET': {
+      const presets = state.presets.map((p) =>
+        p.id === action.presetId ? { ...p, ...action.updates } : p,
+      );
+      return { ...state, presets };
+    }
+
+    case 'DELETE_PRESET': {
+      return {
+        ...state,
+        presets: state.presets.filter((p) => p.id !== action.presetId),
+      };
+    }
+
     default:
       return state;
   }
@@ -493,12 +457,17 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | null>(null);
 
-const STORAGE_KEY = 'brightside-controller-state';
+const STORAGE_KEY = 'colossal-hq-controller-state';
 
 function loadState(): AppState {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved) as AppState;
+    if (saved) {
+      const parsed = JSON.parse(saved) as AppState;
+      // Ensure new fields exist on loaded state
+      if (!parsed.uiState.syncGroups) parsed.uiState.syncGroups = {};
+      return parsed;
+    }
   } catch {
     // ignore
   }

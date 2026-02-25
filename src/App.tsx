@@ -6,7 +6,7 @@ import { EndpointDetail } from './pages/EndpointDetail';
 import { Library } from './pages/Library';
 import { PlaylistBuilder } from './pages/PlaylistBuilder';
 import { Presets } from './pages/Presets';
-import { ActivityLog } from './pages/ActivityLog';
+import { PresetBuilder } from './pages/PresetBuilder';
 import { Settings } from './pages/Settings';
 
 function NotFound() {
@@ -34,7 +34,8 @@ export default function App() {
           <Route path="/library" element={<Library />} />
           <Route path="/playlists/:playlistId/edit" element={<PlaylistBuilder />} />
           <Route path="/presets" element={<Presets />} />
-          <Route path="/log" element={<ActivityLog />} />
+          <Route path="/presets/new" element={<PresetBuilder />} />
+          <Route path="/presets/:presetId/edit" element={<PresetBuilder />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

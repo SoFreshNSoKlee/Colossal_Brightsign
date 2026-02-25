@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { CheckCircle, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Pencil, Trash2, CheckCircle, Calendar } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -14,21 +15,46 @@ const PRESET_ICONS: Record<string, string> = {
   'general-tour': '🗺️',
 };
 
+function todayDateString() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function nowTimeString() {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
 export function Presets() {
   const { state, dispatch } = useApp();
-  const [confirmPreset, setConfirmPreset] = useState<Preset | null>(null);
+  const navigate = useNavigate();
+
+  const [schedulerPreset, setSchedulerPreset] = useState<Preset | null>(null);
+  const [scheduleNow, setScheduleNow] = useState(true);
+  const [scheduleDate, setScheduleDate] = useState(todayDateString());
+  const [scheduleStartTime, setScheduleStartTime] = useState(nowTimeString());
+  const [scheduleEndTime, setScheduleEndTime] = useState('');
   const [appliedId, setAppliedId] = useState<string | null>(null);
 
-  const handleApply = (preset: Preset) => {
-    setConfirmPreset(preset);
+  const openScheduler = (preset: Preset) => {
+    setSchedulerPreset(preset);
+    setScheduleNow(true);
+    setScheduleDate(todayDateString());
+    setScheduleStartTime(nowTimeString());
+    setScheduleEndTime('');
   };
 
   const handleConfirm = () => {
-    if (!confirmPreset) return;
-    dispatch({ type: 'APPLY_PRESET', presetId: confirmPreset.id });
-    setAppliedId(confirmPreset.id);
-    setConfirmPreset(null);
+    if (!schedulerPreset) return;
+    dispatch({ type: 'APPLY_PRESET', presetId: schedulerPreset.id });
+    setAppliedId(schedulerPreset.id);
+    setSchedulerPreset(null);
     setTimeout(() => setAppliedId(null), 3000);
+  };
+
+  const handleDelete = (presetId: string) => {
+    if (window.confirm('Delete this preset?')) {
+      dispatch({ type: 'DELETE_PRESET', presetId });
+    }
   };
 
   return (
@@ -44,10 +70,22 @@ export function Presets() {
           </div>
         )}
 
+        {/* New Preset button */}
+        <div className="flex justify-end">
+          <NeoButton
+            variant="primary"
+            size="sm"
+            onClick={() => navigate('/presets/new')}
+            icon={<Plus size={14} />}
+          >
+            New Preset
+          </NeoButton>
+        </div>
+
         <div className="space-y-3">
           {state.presets.map((preset) => (
             <NeoCard key={preset.id}>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
                 {/* Icon + info */}
                 <div className="flex gap-3 items-start flex-1 min-w-0">
                   <div className="text-3xl select-none flex-shrink-0">
@@ -65,46 +103,134 @@ export function Presets() {
                   </div>
                 </div>
 
-                {/* Apply button */}
-                <NeoButton
-                  variant="primary"
-                  size="sm"
-                  onClick={() => handleApply(preset)}
-                  className="flex-shrink-0"
-                >
-                  Apply
-                </NeoButton>
+                {/* Action buttons */}
+                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                  <NeoButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => openScheduler(preset)}
+                  >
+                    Apply
+                  </NeoButton>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => navigate(`/presets/${preset.id}/edit`)}
+                      className="flex-1 h-7 rounded-neo-sm neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-neo-accent transition-colors"
+                    >
+                      <Pencil size={12} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(preset.id)}
+                      className="flex-1 h-7 rounded-neo-sm neo-surface shadow-neo-sm flex items-center justify-center text-neo-muted hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                </div>
               </div>
             </NeoCard>
           ))}
+
+          {state.presets.length === 0 && (
+            <NeoCard className="py-12 text-center">
+              <div className="text-4xl mb-3">⚙️</div>
+              <p className="text-neo-muted">No presets yet.</p>
+              <p className="text-xs text-neo-muted mt-1">Create one to get started.</p>
+            </NeoCard>
+          )}
         </div>
       </div>
 
-      {/* ── Confirmation sheet ── */}
+      {/* ── Scheduler Modal ── */}
       <BottomSheetModal
-        isOpen={!!confirmPreset}
-        onClose={() => setConfirmPreset(null)}
-        title={`Apply: ${confirmPreset?.name ?? ''}`}
-        snapHeight="auto"
+        isOpen={!!schedulerPreset}
+        onClose={() => setSchedulerPreset(null)}
+        title={`Apply: ${schedulerPreset?.name ?? ''}`}
+        snapHeight="full"
       >
-        {confirmPreset && (
-          <div className="space-y-4">
-            {/* Warning */}
-            <div className="flex items-start gap-3 p-3 rounded-neo-sm bg-amber-100 text-amber-800">
-              <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
-              <p className="text-sm">
-                This will change <strong>{confirmPreset.changes.length}</strong> endpoint
-                {confirmPreset.changes.length !== 1 ? 's' : ''}. Review the changes below.
+        {schedulerPreset && (
+          <div className="space-y-5">
+            {/* When section */}
+            <div>
+              <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-3">
+                When
               </p>
+
+              {/* Now checkbox */}
+              <button
+                onClick={() => setScheduleNow((v) => !v)}
+                className={[
+                  'w-full flex items-center gap-3 p-3 rounded-neo-sm transition-all',
+                  scheduleNow ? 'neo-surface shadow-neo-inset' : 'neo-surface shadow-neo-sm',
+                ].join(' ')}
+              >
+                <div
+                  className={[
+                    'w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center border-2 transition-colors',
+                    scheduleNow
+                      ? 'bg-neo-accent border-neo-accent'
+                      : 'border-neo-dark bg-neo-bg',
+                  ].join(' ')}
+                >
+                  {scheduleNow && (
+                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                      <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className="text-sm font-semibold text-neo-text">Apply Now</div>
+                  <div className="text-xs text-neo-muted">Take effect immediately</div>
+                </div>
+              </button>
+
+              {/* Date/time picker (when not now) */}
+              {!scheduleNow && (
+                <div className="mt-3 space-y-3 p-3 rounded-neo-sm neo-surface shadow-neo-inner">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-neo-muted mb-1">
+                    <Calendar size={13} />
+                    Scheduled time
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-neo-muted block mb-1">Date</label>
+                    <input
+                      type="date"
+                      value={scheduleDate}
+                      onChange={(e) => setScheduleDate(e.target.value)}
+                      className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-neo-muted block mb-1">Start time</label>
+                      <input
+                        type="time"
+                        value={scheduleStartTime}
+                        onChange={(e) => setScheduleStartTime(e.target.value)}
+                        className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-neo-muted block mb-1">End time (optional)</label>
+                      <input
+                        type="time"
+                        value={scheduleEndTime}
+                        onChange={(e) => setScheduleEndTime(e.target.value)}
+                        className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-sm text-sm text-neo-text focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Change summary */}
+            {/* Changes summary */}
             <div>
               <p className="text-xs font-semibold text-neo-muted uppercase tracking-widest mb-2">
-                Changes
+                Changes ({schedulerPreset.changes.length} endpoint{schedulerPreset.changes.length !== 1 ? 's' : ''})
               </p>
               <div className="space-y-1.5">
-                {confirmPreset.changes.map((change) => {
+                {schedulerPreset.changes.map((change) => {
                   const ep = state.endpoints.find((e) => e.id === change.endpointId);
                   const asset = change.assetId
                     ? state.assets.find((a) => a.id === change.assetId)
@@ -145,16 +271,16 @@ export function Presets() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div className="flex gap-3 pt-1">
               <NeoButton
                 variant="secondary"
                 fullWidth
-                onClick={() => setConfirmPreset(null)}
+                onClick={() => setSchedulerPreset(null)}
               >
                 Cancel
               </NeoButton>
               <NeoButton variant="primary" fullWidth onClick={handleConfirm}>
-                Confirm Apply
+                {scheduleNow ? 'Apply Now' : 'Schedule'}
               </NeoButton>
             </div>
           </div>

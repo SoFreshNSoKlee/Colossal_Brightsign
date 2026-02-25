@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Sliders, ClipboardList, Settings, Zap } from 'lucide-react';
+import { Home, BookOpen, Sliders, Settings, Zap } from 'lucide-react';
 
 const navItems = [
   { to: '/', label: 'Home', Icon: Home },
   { to: '/library', label: 'Library', Icon: BookOpen },
   { to: '/presets', label: 'Presets', Icon: Sliders },
-  { to: '/log', label: 'Activity Log', Icon: ClipboardList },
   { to: '/settings', label: 'Settings', Icon: Settings },
 ];
 
@@ -18,7 +17,7 @@ export function Sidebar() {
           <Zap size={20} className="text-white" />
         </div>
         <div>
-          <div className="text-sm font-bold text-neo-text leading-tight">Brightside</div>
+          <div className="text-sm font-bold text-neo-text leading-tight">Colossal HQ</div>
           <div className="text-xs text-neo-muted">Controller</div>
         </div>
       </div>
@@ -47,7 +46,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-neo-dark/20">
-        <p className="text-xs text-neo-muted">Colossal Brightside v0.1</p>
+        <p className="text-xs text-neo-muted">Colossal HQ v0.1</p>
       </div>
     </aside>
   );

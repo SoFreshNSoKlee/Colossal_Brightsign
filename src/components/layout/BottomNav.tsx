@@ -1,11 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Sliders, ClipboardList, Settings } from 'lucide-react';
+import { Home, BookOpen, Sliders, Settings } from 'lucide-react';
 
 const navItems = [
   { to: '/', label: 'Home', Icon: Home },
   { to: '/library', label: 'Library', Icon: BookOpen },
   { to: '/presets', label: 'Presets', Icon: Sliders },
-  { to: '/log', label: 'Log', Icon: ClipboardList },
   { to: '/settings', label: 'Settings', Icon: Settings },
 ];
 
