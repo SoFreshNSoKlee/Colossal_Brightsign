@@ -1,23 +1,32 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Sliders, Settings, Zap } from 'lucide-react';
+import { Home, BookOpen, Sliders, Settings, Info } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import colossalLogoBlk from '../../Assets/Colossal_BrandingRegistered_Logo_Icon_RGB_Blk.png';
+import colossalLogoWht from '../../Assets/Colossal_BrandingRegistered_Logo_Icon_RGB_Wht.png';
 
 const navItems = [
   { to: '/', label: 'Home', Icon: Home },
   { to: '/library', label: 'Library', Icon: BookOpen },
   { to: '/presets', label: 'Presets', Icon: Sliders },
+  { to: '/info', label: 'Info', Icon: Info },
   { to: '/settings', label: 'Settings', Icon: Settings },
 ];
 
 export function Sidebar() {
+  const { state } = useApp();
+  const isDark = state.uiState.theme === 'dark';
+
   return (
     <aside className="hidden lg:flex flex-col w-64 flex-shrink-0 neo-surface shadow-neo border-r border-neo-dark/20 min-h-screen sticky top-0">
       {/* Logo */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-neo-dark/20">
-        <div className="w-10 h-10 rounded-neo-pill bg-neo-accent shadow-neo-sm flex items-center justify-center flex-shrink-0">
-          <Zap size={20} className="text-white" />
-        </div>
+        <img
+          src={isDark ? colossalLogoWht : colossalLogoBlk}
+          alt="Colossal"
+          className="w-10 h-10 object-contain flex-shrink-0"
+        />
         <div>
-          <div className="text-sm font-bold text-neo-text leading-tight">Colossal HQ</div>
+          <div className="text-sm font-bold text-neo-text leading-tight font-headline">Colossal HQ</div>
           <div className="text-xs text-neo-muted">Controller</div>
         </div>
       </div>

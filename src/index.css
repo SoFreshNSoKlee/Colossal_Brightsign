@@ -2,9 +2,85 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Custom Fonts ──────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'NBArchitektStd';
+  src: url('./Fonts/NBArchitektStd-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PPTelegraf';
+  src: url('./Fonts/PPTelegraf-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'PPTelegraf';
+  src: url('./Fonts/PPTelegraf-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Color Variables (Light Mode) ─────────────────────────────────────────── */
+
+:root {
+  --shadow-dark: #b8b4ae;
+  --shadow-light: #ffffff;
+  --neo-bg: #ddd9d3;
+  --neo-surface: #e8e4de;
+  --neo-raised: #f0ece6;
+  --neo-dark: #b8b4ae;
+  --neo-darker: #9a9690;
+  --neo-accent: #5c6bc0;
+  --neo-accent-hover: #7986cb;
+  --neo-accent-light: #e8eaf6;
+  --neo-accent2: #7c4dff;
+  --neo-text: #2d2a26;
+  --neo-muted: #6e6a65;
+  --neo-green: #22c55e;
+  --neo-red: #ef4444;
+  --neo-amber: #f59e0b;
+  --neo-surface-from: #f2efe9;
+  --neo-surface-to: #dedad4;
+  --neo-bg-from: #e2ded8;
+  --neo-bg-to: #d4d0ca;
+}
+
+/* ── Color Variables (Dark Mode) ──────────────────────────────────────────── */
+
+.dark {
+  --shadow-dark: #0a0908;
+  --shadow-light: #2e2c2a;
+  --neo-bg: #1a1918;
+  --neo-surface: #222120;
+  --neo-raised: #2a2927;
+  --neo-dark: #0f0e0d;
+  --neo-darker: #050504;
+  --neo-accent: #7986cb;
+  --neo-accent-hover: #9fa8da;
+  --neo-accent-light: #1a1f3a;
+  --neo-accent2: #9c6eff;
+  --neo-text: #f0ece6;
+  --neo-muted: #8e8a85;
+  --neo-green: #22c55e;
+  --neo-red: #ef4444;
+  --neo-amber: #f59e0b;
+  --neo-surface-from: #2a2927;
+  --neo-surface-to: #1a1918;
+  --neo-bg-from: #222120;
+  --neo-bg-to: #161514;
+}
+
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'PPTelegraf', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -14,6 +90,10 @@
     overscroll-behavior: none;
   }
 
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'NBArchitektStd', system-ui, sans-serif;
+  }
+
   * {
     box-sizing: border-box;
   }
@@ -21,11 +101,15 @@
 
 @layer utilities {
   .neo-surface {
-    background: linear-gradient(145deg, #f2efe9 0%, #dedad4 100%);
+    background: linear-gradient(145deg, var(--neo-surface-from) 0%, var(--neo-surface-to) 100%);
   }
 
   .neo-bg {
-    background: linear-gradient(160deg, #e2ded8 0%, #d4d0ca 100%);
+    background: linear-gradient(160deg, var(--neo-bg-from) 0%, var(--neo-bg-to) 100%);
+  }
+
+  .font-headline {
+    font-family: 'NBArchitektStd', system-ui, sans-serif;
   }
 
   /* Safe area inset for bottom nav on iOS */

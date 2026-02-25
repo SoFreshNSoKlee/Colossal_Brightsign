@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
+  darkMode: 'class',
   safelist: [
     'bg-green-100', 'text-green-700', 'bg-green-500',
     'bg-amber-100', 'text-amber-700', 'bg-amber-500',
@@ -13,31 +14,31 @@ export default {
     extend: {
       colors: {
         neo: {
-          bg: '#ddd9d3',
-          surface: '#e8e4de',
-          raised: '#f0ece6',
-          dark: '#b8b4ae',
-          darker: '#9a9690',
-          accent: '#5c6bc0',
-          'accent-hover': '#7986cb',
-          'accent-light': '#e8eaf6',
-          accent2: '#7c4dff',
-          text: '#2d2a26',
-          muted: '#6e6a65',
-          green: '#22c55e',
-          red: '#ef4444',
-          amber: '#f59e0b',
+          bg: 'var(--neo-bg)',
+          surface: 'var(--neo-surface)',
+          raised: 'var(--neo-raised)',
+          dark: 'var(--neo-dark)',
+          darker: 'var(--neo-darker)',
+          accent: 'var(--neo-accent)',
+          'accent-hover': 'var(--neo-accent-hover)',
+          'accent-light': 'var(--neo-accent-light)',
+          accent2: 'var(--neo-accent2)',
+          text: 'var(--neo-text)',
+          muted: 'var(--neo-muted)',
+          green: 'var(--neo-green)',
+          red: 'var(--neo-red)',
+          amber: 'var(--neo-amber)',
         },
       },
       boxShadow: {
-        neo: '5px 5px 10px #b8b4ae, -4px -4px 9px #ffffff',
-        'neo-sm': '3px 3px 6px #b8b4ae, -2px -2px 5px #ffffff',
-        'neo-lg': '8px 8px 18px #b8b4ae, -6px -6px 14px #ffffff',
-        'neo-inset': 'inset 3px 3px 7px #b8b4ae, inset -3px -3px 7px #ffffff',
-        'neo-pressed': 'inset 4px 4px 9px #b8b4ae, inset -2px -2px 5px #ffffff',
-        'neo-inner': 'inset 2px 2px 5px #b8b4ae, inset -2px -2px 5px #ffffff',
+        neo: '5px 5px 10px var(--shadow-dark), -4px -4px 9px var(--shadow-light)',
+        'neo-sm': '3px 3px 6px var(--shadow-dark), -2px -2px 5px var(--shadow-light)',
+        'neo-lg': '8px 8px 18px var(--shadow-dark), -6px -6px 14px var(--shadow-light)',
+        'neo-inset': 'inset 3px 3px 7px var(--shadow-dark), inset -3px -3px 7px var(--shadow-light)',
+        'neo-pressed': 'inset 4px 4px 9px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light)',
+        'neo-inner': 'inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light)',
         'neo-accent':
-          '5px 5px 10px #b8b4ae, -4px -4px 9px #ffffff, inset 0 0 0 1px rgba(92,107,192,0.2)',
+          '5px 5px 10px var(--shadow-dark), -4px -4px 9px var(--shadow-light), inset 0 0 0 1px rgba(92,107,192,0.2)',
       },
       borderRadius: {
         neo: '20px',
@@ -45,13 +46,14 @@ export default {
         'neo-pill': '9999px',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['PPTelegraf', 'system-ui', 'sans-serif'],
+        headline: ['NBArchitektStd', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
         'neo-gradient':
-          'linear-gradient(145deg, #eeebe5 0%, #ddd9d3 100%)',
+          'linear-gradient(145deg, var(--neo-surface-from) 0%, var(--neo-bg) 100%)',
         'neo-surface-gradient':
-          'linear-gradient(145deg, #f2efe9 0%, #e0ddd7 100%)',
+          'linear-gradient(145deg, var(--neo-surface-from) 0%, var(--neo-surface-to) 100%)',
       },
     },
   },
