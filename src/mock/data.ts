@@ -8,11 +8,6 @@ export const mockAssets: Asset[] = [
   { id: 'mammoth-highlight', endpointId: 'lobby-left-led', title: 'Mammoth Highlight', tags: ['Mammoth', 'Investor'], durationSec: 180, aspect: '16:9', updatedAt: '2024-10-05T11:30:00Z', color: '#A0522D' },
   { id: 'lobby-brand-reel', endpointId: 'lobby-left-led', title: 'Brand Reel', tags: ['Ambient', 'Press'], durationSec: 240, aspect: '16:9', updatedAt: '2024-10-07T10:00:00Z', color: '#3A7CA5' },
 
-  // Lobby – LED Screen (9:16) — 3 assets
-  { id: 'lobby-vertical-banner', endpointId: 'lobby-led-screen', title: 'Lobby Vertical Banner', tags: ['Ambient'], durationSec: 900, aspect: '9:16', updatedAt: '2024-10-02T10:00:00Z', color: '#5D4037' },
-  { id: 'species-timeline', endpointId: 'lobby-led-screen', title: 'Species Timeline', tags: ['Investor', 'Mammoth'], durationSec: 300, aspect: '9:16', updatedAt: '2024-10-06T14:00:00Z', color: '#1A237E' },
-  { id: 'welcome-loop', endpointId: 'lobby-led-screen', title: 'Welcome Loop', tags: ['Ambient'], durationSec: 1200, aspect: '9:16', updatedAt: '2024-10-09T09:30:00Z', color: '#37474F' },
-
   // Automation – Screen 1 (16:9) — 3 assets
   { id: 'dodo-walk', endpointId: 'auto-nano-1', title: 'Dodo Walk', tags: ['Dodo', 'Ambient'], durationSec: 2400, aspect: '16:9', updatedAt: '2024-09-20T14:00:00Z', color: '#5B8FA8' },
   { id: 'dodo-feature', endpointId: 'auto-nano-1', title: 'Dodo Feature', tags: ['Dodo', 'Press'], durationSec: 300, aspect: '16:9', updatedAt: '2024-09-25T10:00:00Z', color: '#3A7CA5' },
@@ -56,6 +51,24 @@ export const mockAssets: Asset[] = [
   // Tour Path – Wall 3 (16:9) — 2 assets
   { id: 'expedition-footage', endpointId: 'tour-wall-3', title: 'Expedition Footage', tags: ['Ambient', 'Press'], durationSec: 1200, aspect: '16:9', updatedAt: '2024-10-07T14:00:00Z', color: '#F57C00' },
   { id: 'discovery-reel', endpointId: 'tour-wall-3', title: 'Discovery Reel', tags: ['Press', 'Kids'], durationSec: 300, aspect: '16:9', updatedAt: '2024-10-06T11:00:00Z', color: '#D32F2F' },
+
+  // C-Suite Nano – Screen 1 (16:9)
+  { id: 'csn-ambient-1', endpointId: 'csn-screen-1', title: 'C-Suite Ambient', tags: ['Ambient', 'Investor'], durationSec: 1800, aspect: '16:9', updatedAt: '2024-10-15T09:00:00Z', color: '#1A237E' },
+
+  // C-Suite Nano – Screen 2 (16:9)
+  { id: 'csn-ambient-2', endpointId: 'csn-screen-2', title: 'Executive Highlight', tags: ['Investor'], durationSec: 300, aspect: '16:9', updatedAt: '2024-10-15T09:00:00Z', color: '#4A148C' },
+
+  // C-Suite Nano – Screen 3 (9:16)
+  { id: 'csn-ambient-3', endpointId: 'csn-screen-3', title: 'C-Suite Vertical', tags: ['Ambient'], durationSec: 900, aspect: '9:16', updatedAt: '2024-10-15T09:00:00Z', color: '#263238' },
+
+  // C-Suite Floor Projections – Projector 1 (16:9)
+  { id: 'csfp-ambient-1', endpointId: 'csfp-proj-1', title: 'Floor Projection A', tags: ['Ambient'], durationSec: 3600, aspect: '16:9', updatedAt: '2024-10-15T10:00:00Z', color: '#004D40' },
+
+  // C-Suite Floor Projections – Projector 2 (16:9)
+  { id: 'csfp-ambient-2', endpointId: 'csfp-proj-2', title: 'Floor Projection B', tags: ['Ambient'], durationSec: 3600, aspect: '16:9', updatedAt: '2024-10-15T10:00:00Z', color: '#1B5E20' },
+
+  // C-Suite Floor Projections – Projector 3 (16:9)
+  { id: 'csfp-ambient-3', endpointId: 'csfp-proj-3', title: 'Floor Projection C', tags: ['Ambient'], durationSec: 3600, aspect: '16:9', updatedAt: '2024-10-15T10:00:00Z', color: '#0D47A1' },
 ];
 
 // ─── PLAYLISTS ─────────────────────────────────────────────────────────────────
@@ -66,17 +79,13 @@ export const mockPlaylists: Playlist[] = [
     { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 0 },
     { endpointId: 'lobby-left-led', assetId: 'mammoth-highlight', order: 1 },
     { endpointId: 'lobby-left-led', assetId: 'lobby-brand-reel', order: 2 },
-    { endpointId: 'lobby-led-screen', assetId: 'lobby-vertical-banner', order: 0 },
-    { endpointId: 'lobby-led-screen', assetId: 'welcome-loop', order: 1 },
   ]},
   { id: 'lobby-origin-story', name: 'Origin Story', roomId: 'lobby', loop: false, items: [
     { endpointId: 'lobby-left-led', assetId: 'mammoth-highlight', order: 0 },
     { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 1 },
-    { endpointId: 'lobby-led-screen', assetId: 'species-timeline', order: 0 },
   ]},
   { id: 'lobby-specimen-archive', name: 'Specimen Archive', roomId: 'lobby', loop: true, items: [
     { endpointId: 'lobby-left-led', assetId: 'mammoth-loop', order: 0 },
-    { endpointId: 'lobby-led-screen', assetId: 'lobby-vertical-banner', order: 0 },
   ]},
 
   // Automation Suite
@@ -155,23 +164,38 @@ export const mockPlaylists: Playlist[] = [
     { endpointId: 'tour-wall-3', assetId: 'expedition-footage', order: 0 },
     { endpointId: 'tour-wall-3', assetId: 'discovery-reel', order: 1 },
   ]},
+
+  // C-Suite Nano
+  { id: 'csn-default', name: 'Default', roomId: 'c-suite-nano', loop: true, items: [
+    { endpointId: 'csn-screen-1', assetId: 'csn-ambient-1', order: 0 },
+    { endpointId: 'csn-screen-2', assetId: 'csn-ambient-2', order: 0 },
+    { endpointId: 'csn-screen-3', assetId: 'csn-ambient-3', order: 0 },
+  ]},
+
+  // C-Suite Floor Projections
+  { id: 'csfp-default', name: 'Default', roomId: 'c-suite-floor', loop: true, items: [
+    { endpointId: 'csfp-proj-1', assetId: 'csfp-ambient-1', order: 0 },
+    { endpointId: 'csfp-proj-2', assetId: 'csfp-ambient-2', order: 0 },
+    { endpointId: 'csfp-proj-3', assetId: 'csfp-ambient-3', order: 0 },
+  ]},
 ];
 
 // ─── ROOMS ─────────────────────────────────────────────────────────────────────
 
 export const mockRooms: Room[] = [
-  { id: 'lobby', name: 'Lobby', endpointIds: ['lobby-left-led', 'lobby-led-screen'] },
+  { id: 'lobby', name: 'Lobby', endpointIds: ['lobby-left-led'] },
   { id: 'automation-suite', name: 'Automation Suite', endpointIds: ['auto-nano-1', 'auto-nano-2'] },
   { id: 'megalodon-room', name: 'Megalodon Room', endpointIds: ['mega-wall-1', 'mega-wall-2', 'mega-wall-3'] },
   { id: 'social-den', name: 'Social Den', endpointIds: ['social-screen-1', 'social-screen-2'] },
   { id: 'tour-path', name: 'Tour Path', endpointIds: ['tour-wall-1', 'tour-wall-2', 'tour-wall-3'] },
+  { id: 'c-suite-nano', name: 'C-Suite Nano', endpointIds: ['csn-screen-1', 'csn-screen-2', 'csn-screen-3'] },
+  { id: 'c-suite-floor', name: 'C-Suite Floor Projections', endpointIds: ['csfp-proj-1', 'csfp-proj-2', 'csfp-proj-3'] },
 ];
 
 // ─── ENDPOINTS ─────────────────────────────────────────────────────────────────
 
 export const mockEndpoints: Endpoint[] = [
-  { id: 'lobby-left-led', name: 'Lobby – Left LED Wall', roomId: 'lobby', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'lobby-default', positionSec: 120, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
-  { id: 'lobby-led-screen', name: 'Lobby – LED Screen', roomId: 'lobby', aspectRatio: '9:16', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'lobby-default', positionSec: 120, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
+  { id: 'lobby-left-led', name: 'Lobby – LED Wall', roomId: 'lobby', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'lobby-default', positionSec: 120, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
   { id: 'auto-nano-1', name: 'Automation – Screen 1', roomId: 'automation-suite', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'auto-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 80 },
   { id: 'auto-nano-2', name: 'Automation – Screen 2', roomId: 'automation-suite', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'auto-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 80 },
   { id: 'mega-wall-1', name: 'Megalodon – Wall 1', roomId: 'megalodon-room', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'mega-ambient', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
@@ -182,6 +206,12 @@ export const mockEndpoints: Endpoint[] = [
   { id: 'tour-wall-1', name: 'Tour Path – Wall 1', roomId: 'tour-path', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
   { id: 'tour-wall-2', name: 'Tour Path – Wall 2', roomId: 'tour-path', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
   { id: 'tour-wall-3', name: 'Tour Path – Wall 3', roomId: 'tour-path', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'tour-default', positionSec: 600, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: false }, loop: true, brightness: 100 },
+  { id: 'csn-screen-1', name: 'C-Suite Nano – Screen 1', roomId: 'c-suite-nano', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csn-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
+  { id: 'csn-screen-2', name: 'C-Suite Nano – Screen 2', roomId: 'c-suite-nano', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csn-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
+  { id: 'csn-screen-3', name: 'C-Suite Nano – Screen 3', roomId: 'c-suite-nano', aspectRatio: '9:16', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csn-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
+  { id: 'csfp-proj-1', name: 'C-Suite Floor – Projector 1', roomId: 'c-suite-floor', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csfp-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
+  { id: 'csfp-proj-2', name: 'C-Suite Floor – Projector 2', roomId: 'c-suite-floor', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csfp-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
+  { id: 'csfp-proj-3', name: 'C-Suite Floor – Projector 3', roomId: 'c-suite-floor', aspectRatio: '16:9', type: 'playlist', status: 'playing', defaultMode: 'ambient', nowPlaying: { mode: 'playlist', playlistId: 'csfp-default', positionSec: 0, currentItemIndex: 0 }, supports: { playPause: true, restart: true, loop: true, skip: true, brightness: true }, loop: true, brightness: 100 },
 ];
 
 // ─── PRESETS ───────────────────────────────────────────────────────────────────
@@ -196,7 +226,6 @@ export const mockPresets: Preset[] = [
       { endpointId: 'mega-wall-2', mode: 'playlist', playlistId: 'mega-investor-story', playlistIds: ['mega-investor-story'], status: 'playing' },
       { endpointId: 'mega-wall-3', mode: 'playlist', playlistId: 'mega-investor-story', playlistIds: ['mega-investor-story'], status: 'playing' },
       { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
       { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'playing' },
       { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'playing' },
     ],
@@ -212,7 +241,6 @@ export const mockPresets: Preset[] = [
       { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-synthesis-lab', playlistIds: ['social-synthesis-lab'], status: 'playing' },
       { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-synthesis-lab', playlistIds: ['social-synthesis-lab'], status: 'playing' },
       { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
     ],
   },
   {
@@ -228,7 +256,6 @@ export const mockPresets: Preset[] = [
       { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'paused' },
       { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'paused' },
       { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
       { endpointId: 'tour-wall-1', mode: 'playlist', playlistId: 'tour-default', playlistIds: ['tour-default'], status: 'offline' },
       { endpointId: 'tour-wall-2', mode: 'playlist', playlistId: 'tour-default', playlistIds: ['tour-default'], status: 'offline' },
       { endpointId: 'tour-wall-3', mode: 'playlist', playlistId: 'tour-default', playlistIds: ['tour-default'], status: 'offline' },
@@ -246,7 +273,6 @@ export const mockPresets: Preset[] = [
       { endpointId: 'mega-wall-2', mode: 'playlist', playlistId: 'mega-ambient', playlistIds: ['mega-ambient'], status: 'playing' },
       { endpointId: 'mega-wall-3', mode: 'playlist', playlistId: 'mega-ambient', playlistIds: ['mega-ambient'], status: 'playing' },
       { endpointId: 'lobby-left-led', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
-      { endpointId: 'lobby-led-screen', mode: 'playlist', playlistId: 'lobby-default', playlistIds: ['lobby-default'], status: 'playing' },
       { endpointId: 'social-screen-1', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'playing' },
       { endpointId: 'social-screen-2', mode: 'playlist', playlistId: 'social-default', playlistIds: ['social-default'], status: 'playing' },
       { endpointId: 'auto-nano-1', mode: 'playlist', playlistId: 'auto-default', playlistIds: ['auto-default'], status: 'playing' },
@@ -260,9 +286,11 @@ export const mockPresets: Preset[] = [
 export const ALL_TAGS = ['Mammoth', 'Dodo', 'Thylacine', 'Ambient', 'Investor', 'Press', 'Kids'];
 
 export const ROOM_SCREEN_COUNT: Record<string, number> = {
-  lobby: 2,
+  lobby: 1,
   'automation-suite': 2,
   'megalodon-room': 3,
   'social-den': 2,
   'tour-path': 3,
+  'c-suite-nano': 3,
+  'c-suite-floor': 3,
 };
