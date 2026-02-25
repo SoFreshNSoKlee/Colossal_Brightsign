@@ -3,19 +3,23 @@ import type { Asset, Playlist, Preset, Room, Endpoint } from '../types';
 // ─── ASSETS ───────────────────────────────────────────────────────────────────
 
 // ─── ANIMAL IMAGE URLS (Wikimedia Commons) ────────────────────────────────────
+// Using Special:FilePath so Wikimedia resolves the hash automatically — no 404s from wrong hashes.
+const FP = (file: string) =>
+  `https://commons.wikimedia.org/wiki/Special:FilePath/${file}?width=600`;
+
 const IMG = {
-  mammoth1: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Woolly_mammoth_skeleton.jpg',
-  mammoth2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Woolly_mammoth_Mauricio_Ant%C3%B3n.jpg/800px-Woolly_mammoth_Mauricio_Ant%C3%B3n.jpg',
-  mammoth3: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Woolly_mammoth-model.jpg/800px-Woolly_mammoth-model.jpg',
-  thylacine1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Thylacinus_cynocephalus_2_Cronin.jpg/800px-Thylacinus_cynocephalus_2_Cronin.jpg',
-  thylacine2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/TasmanianTiger.jpg/800px-TasmanianTiger.jpg',
-  thylacine3: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Thylacine4.jpg/800px-Thylacine4.jpg',
-  dodo1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Dodo_by_Roelant_Savery_1626.jpg/600px-Dodo_by_Roelant_Savery_1626.jpg',
-  dodo2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Raphus_cucullatus.jpg/600px-Raphus_cucullatus.jpg',
-  direwolf1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Canis_dirus_Sergiodlarosa.jpg/800px-Canis_dirus_Sergiodlarosa.jpg',
-  direwolf2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Dire_wolf_size_comparison.png/800px-Dire_wolf_size_comparison.png',
-  moa1: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Giant_moa.jpg/600px-Giant_moa.jpg',
-  moa2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Moa_scale.jpg/600px-Moa_scale.jpg',
+  mammoth1: FP('Woolly_mammoth_Mauricio_Ant%C3%B3n.jpg'),
+  mammoth2: FP('Woolly_mammoth-model.jpg'),
+  mammoth3: FP('Woolly_Mammoth_model_Royal_BC_Museum_in_Victoria.jpg'),
+  thylacine1: FP('Thylacinus_cynocephalus_-_Gould.jpg'),
+  thylacine2: FP('TasmanianTiger.jpg'),
+  thylacine3: FP('Thylacine4.jpg'),
+  dodo1: FP('Dodo_by_Roelant_Savery_1626.jpg'),
+  dodo2: FP('Oxford_Dodo_display.jpg'),
+  direwolf1: FP('Canis_dirus_Sergiodlarosa.jpg'),
+  direwolf2: FP('Dire_wolf_size_comparison.png'),
+  moa1: FP('Giant_moa.jpg'),
+  moa2: FP('Moa_scale.jpg'),
 };
 
 export const mockAssets: Asset[] = [
