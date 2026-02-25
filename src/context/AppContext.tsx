@@ -483,7 +483,7 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 const STORAGE_KEY = 'colossal-hq-controller-state';
-const DATA_VERSION = 2;
+const DATA_VERSION = 3;
 
 function loadState(): AppState {
   try {
