@@ -1,16 +1,17 @@
 import { NavLink } from 'react-router-dom';
-import { Home, BookOpen, Sliders, Settings } from 'lucide-react';
+import { Home, BookOpen, Sliders, Settings, Info } from 'lucide-react';
 
 const navItems = [
   { to: '/', label: 'Home', Icon: Home },
   { to: '/library', label: 'Library', Icon: BookOpen },
   { to: '/presets', label: 'Presets', Icon: Sliders },
+  { to: '/info', label: 'Info', Icon: Info },
   { to: '/settings', label: 'Settings', Icon: Settings },
 ];
 
 export function BottomNav() {
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-30 neo-surface shadow-[0_-4px_12px_#b8b4ae] pb-safe lg:hidden">
+    <nav className="fixed bottom-0 inset-x-0 z-30 neo-surface shadow-[0_-4px_12px_var(--shadow-dark)] pb-safe lg:hidden">
       <div className="flex items-stretch h-16">
         {navItems.map(({ to, label, Icon }) => (
           <NavLink

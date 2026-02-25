@@ -70,6 +70,8 @@ export interface PresetChange {
   mode: 'asset' | 'playlist';
   assetId?: AssetId;
   playlistId?: PlaylistId;
+  assetIds?: AssetId[];
+  playlistIds?: PlaylistId[];
   status?: 'playing' | 'paused' | 'offline';
 }
 

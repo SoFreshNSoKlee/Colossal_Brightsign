@@ -1,5 +1,8 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChevronLeft, Zap } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import colossalLogoBlk from '../../Assets/Colossal_BrandingRegistered_Logo_Icon_RGB_Blk.png';
+import colossalLogoWht from '../../Assets/Colossal_BrandingRegistered_Logo_Icon_RGB_Wht.png';
 
 interface TopNavProps {
   title?: string;
@@ -9,6 +12,7 @@ const routeTitles: Record<string, string> = {
   '/': 'Brightside',
   '/library': 'Library',
   '/presets': 'Presets',
+  '/info': 'Info',
   '/log': 'Activity Log',
   '/settings': 'Settings',
 };
@@ -16,8 +20,10 @@ const routeTitles: Record<string, string> = {
 export function TopNav({ title }: TopNavProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { state } = useApp();
+  const isDark = state.uiState.theme === 'dark';
 
-  const isRoot = ['/', '/library', '/presets', '/log', '/settings'].includes(
+  const isRoot = ['/', '/library', '/presets', '/info', '/log', '/settings'].includes(
     location.pathname,
   );
   const displayTitle = title ?? routeTitles[location.pathname] ?? 'Brightside';
@@ -35,13 +41,17 @@ export function TopNav({ title }: TopNavProps) {
             <ChevronLeft size={20} />
           </button>
         ) : (
-          <div className="flex-shrink-0 w-9 h-9 rounded-neo-pill bg-neo-accent shadow-neo-sm flex items-center justify-center">
-            <Zap size={16} className="text-white" />
+          <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center">
+            <img
+              src={isDark ? colossalLogoWht : colossalLogoBlk}
+              alt="Colossal"
+              className="w-8 h-8 object-contain"
+            />
           </div>
         )}
 
         {/* Title */}
-        <h1 className="flex-1 text-base font-bold text-neo-text truncate">
+        <h1 className="flex-1 text-base font-bold text-neo-text truncate font-headline">
           {displayTitle}
         </h1>
       </div>

@@ -206,12 +206,14 @@ function reducer(state: AppState, action: AppAction): AppState {
       if (!preset) return state;
       let endpoints = [...state.endpoints];
       preset.changes.forEach((change) => {
+        const effectivePlaylistId = change.playlistIds?.[0] ?? change.playlistId;
+        const effectiveAssetId = change.assetIds?.[0] ?? change.assetId;
         endpoints = updateEndpoints(endpoints, [change.endpointId], () => ({
           status: change.status ?? 'playing',
           nowPlaying: {
             mode: change.mode,
-            assetId: change.assetId,
-            playlistId: change.playlistId,
+            assetId: effectiveAssetId,
+            playlistId: effectivePlaylistId,
             positionSec: 0,
             currentItemIndex: 0,
           },
@@ -475,15 +477,17 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | null>(null);
 
 const STORAGE_KEY = 'colossal-hq-controller-state';
+const DATA_VERSION = 2;
 
 function loadState(): AppState {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      const parsed = JSON.parse(saved) as AppState;
-      // Migration check: verify new required fields are present.
-      // If any endpoint is missing aspectRatio, or any asset is missing endpointId,
-      // or any playlist item is missing endpointId, reset to fresh initial state.
+      const parsed = JSON.parse(saved) as AppState & { _version?: number };
+      // Version bump forces a reset of data while preserving UI prefs
+      if ((parsed._version ?? 0) < DATA_VERSION) {
+        return { ...initialState, uiState: parsed.uiState ?? initialState.uiState };
+      }
       const hasAspectRatio = parsed.endpoints?.every((ep) => 'aspectRatio' in ep);
       const hasEndpointId = parsed.assets?.every((a) => 'endpointId' in a);
       const hasItemEndpointId = parsed.playlists?.every((pl) =>
@@ -506,7 +510,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...state, _version: DATA_VERSION }));
     } catch {
       // ignore
     }
