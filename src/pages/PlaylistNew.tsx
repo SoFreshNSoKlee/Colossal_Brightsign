@@ -23,6 +23,7 @@ export function PlaylistNew() {
   const [name, setName] = useState('');
   const [roomId, setRoomId] = useState(presetRoomId || (state.rooms[0]?.id ?? ''));
   const [loop, setLoop] = useState(true);
+  const [nextPlaylistId, setNextPlaylistId] = useState('');
   const [search, setSearch] = useState('');
 
   // endpointId -> Set of selected assetIds
@@ -56,7 +57,7 @@ export function PlaylistNew() {
       }
     }
 
-    dispatch({ type: 'CREATE_PLAYLIST', name: name.trim(), roomId, loop, items });
+    dispatch({ type: 'CREATE_PLAYLIST', name: name.trim(), roomId, loop, items, ...(!loop && nextPlaylistId ? { nextPlaylistId } : {}) });
 
     if (presetRoomId) {
       navigate(`/room/${roomId}`);
@@ -122,6 +123,27 @@ export function PlaylistNew() {
               />
             </button>
           </div>
+
+          {/* Next playlist (shown when loop is off) */}
+          {!loop && (
+            <div className="mt-3">
+              <label className="text-xs font-semibold text-neo-muted uppercase tracking-widest block mb-1.5">
+                Play next
+              </label>
+              <select
+                value={nextPlaylistId}
+                onChange={(e) => setNextPlaylistId(e.target.value)}
+                className="w-full px-3 py-2 rounded-neo-sm neo-surface shadow-neo-inner text-sm text-neo-text focus:outline-none"
+              >
+                <option value="">— None (stop after) —</option>
+                {state.playlists
+                  .filter((pl) => pl.roomId === roomId)
+                  .map((pl) => (
+                    <option key={pl.id} value={pl.id}>{pl.name}</option>
+                  ))}
+              </select>
+            </div>
+          )}
         </NeoCard>
 
         {/* ── Search ── */}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, CheckCircle, Calendar, Timer } from 'lucide-react';
+import { Plus, Pencil, Trash2, CheckCircle, Calendar, Timer, Clock } from 'lucide-react';
 import { Layout } from '../components/layout/Layout';
 import { NeoCard } from '../components/design-system/NeoCard';
 import { NeoButton } from '../components/design-system/NeoButton';
@@ -186,7 +186,7 @@ export function Presets() {
 
               <div className="space-y-3 p-3 rounded-neo-sm neo-surface shadow-neo-inner">
                 <div className="flex items-center gap-2 text-xs font-semibold text-neo-muted mb-1">
-                  <Calendar size={13} />
+                  <Calendar size={13} className="text-white" />
                   Scheduled time
                 </div>
                 <div>
@@ -200,7 +200,10 @@ export function Presets() {
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[10px] text-neo-muted block mb-1">Start time</label>
+                    <label className="text-[10px] text-neo-muted flex items-center gap-1 mb-1">
+                      <Clock size={10} className="text-white" />
+                      Start time
+                    </label>
                     <input
                       type="time"
                       value={scheduleStartTime}
@@ -209,7 +212,10 @@ export function Presets() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-neo-muted block mb-1">End time</label>
+                    <label className="text-[10px] text-neo-muted flex items-center gap-1 mb-1">
+                      <Clock size={10} className="text-white" />
+                      End time
+                    </label>
                     <input
                       type="time"
                       value={scheduleEndTime}
