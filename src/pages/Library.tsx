@@ -231,18 +231,10 @@ export function Library() {
                     </button>
                   </div>
 
-                  {/* Thumbnail with Upload button */}
+                  {/* Thumbnail */}
                   <div className="w-full h-28 rounded-neo-sm mb-3 shadow-neo-inner flex items-center justify-center relative overflow-hidden"
                     style={{ backgroundColor: asset.color }}>
                     <span className="text-white/50 font-bold text-sm">{asset.aspect}</span>
-                    <button
-                      className="absolute bottom-2 right-2 flex items-center gap-1 px-2 py-1 rounded-neo-pill bg-black/30 hover:bg-black/50 text-white text-[10px] font-semibold transition-colors"
-                      onClick={(e) => e.stopPropagation()}
-                      title="Upload asset file"
-                    >
-                      <Upload size={10} />
-                      Upload
-                    </button>
                   </div>
 
                   <div className="font-bold text-neo-text text-sm pr-16">{asset.title}</div>

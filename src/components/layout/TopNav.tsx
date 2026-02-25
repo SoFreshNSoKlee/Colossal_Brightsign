@@ -9,7 +9,7 @@ interface TopNavProps {
 }
 
 const routeTitles: Record<string, string> = {
-  '/': 'Brightside',
+  '/': 'Colossal HQ',
   '/library': 'Library',
   '/presets': 'Presets',
   '/info': 'Info',
@@ -26,7 +26,7 @@ export function TopNav({ title }: TopNavProps) {
   const isRoot = ['/', '/library', '/presets', '/info', '/log', '/settings'].includes(
     location.pathname,
   );
-  const displayTitle = title ?? routeTitles[location.pathname] ?? 'Brightside';
+  const displayTitle = title ?? routeTitles[location.pathname] ?? 'HQ Controller';
 
   return (
     <header className="sticky top-0 z-30 neo-surface shadow-neo-sm">
